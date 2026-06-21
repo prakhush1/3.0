@@ -70,7 +70,7 @@ export default function Home() {
             </div>
 
             <div className="mt-12 grid max-w-sm grid-cols-3 gap-6 border-t border-gray-200 pt-6">
-              {[["7", "Tools"], ["100%", "Private"], ["$0", "Forever"]].map(([n, l]) => (
+              {[["9", "Tools"], ["100%", "Private"], ["$0", "Forever"]].map(([n, l]) => (
                 <div key={l}>
                   <p className="text-2xl font-extrabold">{n}</p>
                   <p className="text-xs text-gray-400">{l}</p>
@@ -91,7 +91,7 @@ export default function Home() {
               <pre className="text-[13px] leading-7"><code>
 <span className="text-gray-500">{"{"}</span>{"\n"}
 <span className="text-[#9cdcfe]">  &quot;platform&quot;</span><span className="text-gray-500"> : </span><span className="text-[#7ee787]">&quot;JSON Tools&quot;</span><span className="text-gray-500">,</span>{"\n"}
-<span className="text-[#9cdcfe]">  &quot;tools&quot;</span><span className="text-gray-500"> : </span><span className="text-[#f0883e]">7</span><span className="text-gray-500">,</span>{"\n"}
+<span className="text-[#9cdcfe]">  &quot;tools&quot;</span><span className="text-gray-500"> : </span><span className="text-[#f0883e]">9</span><span className="text-gray-500">,</span>{"\n"}
 <span className="text-[#9cdcfe]">  &quot;privacy&quot;</span><span className="text-gray-500"> : </span><span className="text-[#7ee787]">&quot;100% local&quot;</span><span className="text-gray-500">,</span>{"\n"}
 <span className="text-[#9cdcfe]">  &quot;price&quot;</span><span className="text-gray-500"> : </span><span className="text-[#f0883e]">0</span><span className="text-gray-500">,</span>{"\n"}
 <span className="text-[#9cdcfe]">  &quot;signup&quot;</span><span className="text-gray-500"> : </span><span className="text-[#c586c0]">false</span><span className="text-gray-500">,</span>{"\n"}

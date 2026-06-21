@@ -5,6 +5,8 @@ import ConverterWidget from "@/components/tools/ConverterWidget";
 import TreeViewerWidget from "@/components/tools/TreeViewerWidget";
 import DiffCheckerWidget from "@/components/tools/DiffCheckerWidget";
 import PathExtractorWidget from "@/components/tools/PathExtractorWidget";
+import EscapeWidget from "@/components/tools/EscapeWidget";
+import UnescapeWidget from "@/components/tools/UnescapeWidget";
 
 export const WIDGETS = {
   "json-formatter": FormatterWidget,
@@ -14,4 +16,6 @@ export const WIDGETS = {
   "json-tree-viewer": TreeViewerWidget,
   "json-diff-checker": DiffCheckerWidget,
   "json-path-extractor": PathExtractorWidget,
+  "json-escape": EscapeWidget,
+  "json-unescape": UnescapeWidget,
 };

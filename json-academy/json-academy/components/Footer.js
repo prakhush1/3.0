@@ -19,7 +19,7 @@ export default function Footer() {
           <pre className="mt-6 text-xs leading-6 text-gray-500">{`{
   "version": "2.0",
   "status": "online",
-  "tools": 7,
+  "tools": 9,
   "privacy": "100%"
 }`}</pre>
         </div>

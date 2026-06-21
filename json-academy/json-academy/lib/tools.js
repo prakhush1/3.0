@@ -155,6 +155,50 @@ export const TOOLS = [
       { q: "Does it support arrays?", a: "Yes, array indices are included in the generated path, e.g. $.items[0].id." },
     ],
   },
+  {
+    slug: "json-escape",
+    icon: "slash",
+    tag: '"escape":',
+    title: "JSON Escape",
+    sub: "Escape special chars",
+    category: "Escape",
+    shortDesc:
+      "Escape quotes, backslashes, and line breaks so raw text can be safely embedded inside a JSON string value.",
+    intro:
+      "Paste raw text or JSON and instantly get an escaped version — quotes, backslashes, newlines, and tabs are converted to their \\n \\t \\\" \\\\ sequences so the text is safe to embed inside a JSON string.",
+    keywords: ["json escape", "escape json string online", "json string escape tool"],
+    features: [
+      { title: "Handles all control chars", desc: "Escapes quotes, backslashes, newlines, tabs, and other control characters." },
+      { title: "Embed-ready output", desc: "Paste the result straight into any JSON string value without breaking syntax." },
+      { title: "Instant, local processing", desc: "Runs entirely in your browser as you type — nothing is uploaded." },
+    ],
+    faqs: [
+      { q: "What does escaping JSON mean?", a: "It converts characters like quotes and newlines into safe escape sequences (e.g. \" becomes \\\") so text can live inside a JSON string without breaking it." },
+      { q: "Does the output include the surrounding quotes?", a: "No, only the escaped content is returned so you can drop it into your own JSON string literal." },
+    ],
+  },
+  {
+    slug: "json-unescape",
+    icon: "quote",
+    tag: '"unescape":',
+    title: "JSON Unescape",
+    sub: "Reverse escape sequences",
+    category: "Escape",
+    shortDesc:
+      "Convert an escaped JSON string back into its original, readable text by resolving \\n, \\t, \\\" and other sequences.",
+    intro:
+      "Paste an escaped JSON string fragment and instantly get the original, human-readable text back — every \\n, \\t, \\\" and \\\\ sequence is resolved to its real character.",
+    keywords: ["json unescape", "unescape json string online", "remove json escape characters"],
+    features: [
+      { title: "Resolves every sequence", desc: "Handles \\n, \\t, \\r, \\\", \\\\, and unicode \\u escapes." },
+      { title: "Clear error messages", desc: "Invalid or incomplete escape sequences are flagged immediately." },
+      { title: "Great for log debugging", desc: "Turn escaped strings from logs or API payloads back into readable text." },
+    ],
+    faqs: [
+      { q: "What input does this expect?", a: "Paste the escaped content without outer quotes, e.g. Hello\\nWorld, and it will be converted back to readable text." },
+      { q: "What if I paste a full quoted string?", a: "Surrounding quotes are detected and stripped automatically before unescaping." },
+    ],
+  },
 ];
 
 export function getToolBySlug(slug) {

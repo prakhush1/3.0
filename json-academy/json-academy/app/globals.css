@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --color-brand: #8b5cf6;
+  --color-brand-dark: #7c3aed;
+  --color-ink: #171717;
+  --color-sub: #6b7280;
+  --color-line: #e5e7eb;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f9fafb;
+  background-image: radial-gradient(circle, #d8dce1 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+::selection {
+  background: #8b5cf6;
+  color: #fff;
+}

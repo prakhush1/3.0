@@ -4,7 +4,8 @@ import "@fontsource/jetbrains-mono/600.css";
 import "@fontsource/jetbrains-mono/700.css";
 import "@fontsource/jetbrains-mono/800.css";
 import "./globals.css";
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   metadataBase: new URL("https://www.jsonacademy.com"),
@@ -37,6 +38,8 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="font-mono bg-[#f9fafb] text-[#171717] antialiased">
         {children}
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

@@ -6,7 +6,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { TOOLS } from "@/lib/tools";
 
-const FILTERS = ["All Tools", "Format", "Validate", "Convert", "View", "Compare"];
+const FILTERS = ["All Tools", "Format", "Validate", "Convert", "View", "Compare", "Escape"];
 
 export default function ToolsClient() {
   const [query, setQuery] = useState("");

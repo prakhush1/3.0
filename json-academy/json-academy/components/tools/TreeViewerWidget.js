@@ -1,70 +1,60 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import Icon from "@/components/Icon";
-import { Field, ErrorBanner, taLightClass } from "./Panel";
 
 const SAMPLE = `{
   "platform": "JSON Tools",
-  "tools": 7,
+  "tools": 9,
   "active": true,
   "owner": null,
   "tags": ["json", "free", "private"],
   "meta": { "version": "2.0", "open": false }
 }`;
 
+/* ─── helpers ─────────────────────────────────────────── */
 function valueColor(v) {
-  if (typeof v === "string") return "text-emerald-600";
-  if (typeof v === "number") return "text-orange-500";
-  if (typeof v === "boolean" || v === null) return "text-violet-500";
-  return "text-[#171717]";
+  if (typeof v === "string") return "text-emerald-400";
+  if (typeof v === "number") return "text-orange-400";
+  if (typeof v === "boolean" || v === null) return "text-violet-400";
+  return "text-gray-200";
 }
-
-function formatPrimitive(v) {
-  if (v === null) return "null";
-  if (typeof v === "string") return `"${v}"`;
-  return String(v);
-}
+function fmt(v) { if (v === null) return "null"; if (typeof v === "string") return `"${v}"`; return String(v); }
 
 function TreeNode({ k, value, depth, expandAll }) {
   const [open, setOpen] = useState(depth < 2);
-  const isObj = value && typeof value === "object";
+  const isObj = value !== null && typeof value === "object";
   const expanded = expandAll === null ? open : expandAll;
 
-  if (!isObj) {
-    return (
-      <div className="py-0.5 pl-4" style={{ marginLeft: depth * 14 }}>
-        {k !== undefined && <span className="text-[#171717]">&quot;{k}&quot;: </span>}
-        <span className={valueColor(value)}>{formatPrimitive(value)}</span>
-      </div>
-    );
-  }
+  if (!isObj) return (
+    <div className="py-px pl-4" style={{ marginLeft: depth * 16 }}>
+      {k !== undefined && <span className="text-gray-400">"{k}": </span>}
+      <span className={valueColor(value)}>{fmt(value)}</span>
+    </div>
+  );
 
-  const isArray = Array.isArray(value);
-  const entries = isArray ? value.map((v, i) => [i, v]) : Object.entries(value);
+  const isArr = Array.isArray(value);
+  const entries = isArr ? value.map((v, i) => [i, v]) : Object.entries(value);
 
   return (
-    <div className="py-0.5" style={{ marginLeft: depth * 14 }}>
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1 pl-4 text-left hover:text-violet-500"
-      >
-        <Icon name="arrow-right" className={"w-3 h-3 transition " + (expanded ? "rotate-90" : "")} />
-        {k !== undefined && <span className="text-[#171717]">&quot;{k}&quot;: </span>}
-        <span className="text-gray-400">
-          {isArray ? `Array(${entries.length})` : `Object(${entries.length})`}
-        </span>
+    <div className="py-px" style={{ marginLeft: depth * 16 }}>
+      <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-1 pl-1 text-left transition hover:text-violet-400">
+        <Icon name="arrow-right" className={`w-3 h-3 shrink-0 transition-transform ${expanded ? "rotate-90" : ""}`} />
+        {k !== undefined && <span className="text-gray-400">"{k}": </span>}
+        <span className="text-gray-500">{isArr ? `[ ${entries.length} ]` : `{ ${entries.length} }`}</span>
       </button>
       {expanded && (
         <div>
-          {entries.map(([ck, cv]) => (
-            <TreeNode key={ck} k={ck} value={cv} depth={depth + 1} expandAll={expandAll} />
-          ))}
+          {entries.map(([ck, cv]) => <TreeNode key={ck} k={ck} value={cv} depth={depth + 1} expandAll={expandAll} />)}
         </div>
       )}
     </div>
   );
 }
+
+/* ─── main ───────────────────────────────────────────── */
+const ta = "absolute inset-0 h-full w-full resize-none bg-transparent py-3 px-4 font-mono text-[13px] text-gray-200 outline-none placeholder:text-gray-600 focus:ring-1 focus:ring-inset focus:ring-violet-500";
 
 export default function TreeViewerWidget() {
   const [input, setInput] = useState(SAMPLE);
@@ -72,43 +62,80 @@ export default function TreeViewerWidget() {
 
   const { data, error } = useMemo(() => {
     if (!input.trim()) return { data: null, error: "" };
-    try {
-      return { data: JSON.parse(input), error: "" };
-    } catch (e) {
-      return { data: null, error: e.message };
-    }
+    try { return { data: JSON.parse(input), error: "" }; }
+    catch (e) { return { data: null, error: e.message }; }
   }, [input]);
 
+  useEffect(() => { document.documentElement.style.overflow = "hidden"; return () => { document.documentElement.style.overflow = ""; }; }, []);
+
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Input JSON">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            spellCheck={false}
-            className={taLightClass}
-          />
-        </Field>
-        <Field
-          label="Interactive tree"
-          action={
-            <div className="flex gap-2">
-              <button onClick={() => setExpandAll(true)} className="text-xs font-semibold text-violet-500 hover:underline">
-                Expand all
-              </button>
-              <button onClick={() => setExpandAll(false)} className="text-xs font-semibold text-gray-500 hover:underline">
-                Collapse all
-              </button>
-            </div>
-          }
-        >
-          <div className="h-64 overflow-auto rounded-lg border border-gray-200 bg-gray-50 p-3 font-mono text-[13px]">
-            {data && <TreeNode value={data} depth={0} expandAll={expandAll} />}
+    <div className="fixed inset-0 flex flex-col bg-[#0d1117]">
+      {/* top bar */}
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-white/10 px-4">
+        <div className="flex items-center gap-5">
+          <Link href="/" className="flex items-center gap-1.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-500 text-white"><Icon name="code" className="w-3.5 h-3.5" /></span>
+            <span className="hidden text-sm font-bold text-white sm:block"><span className="text-violet-400">&#123;JSON&#125;</span> Academy</span>
+          </Link>
+          <nav className="flex items-center gap-1">
+            <Link href="/" className="rounded-md px-3 py-1.5 text-xs text-gray-400 transition hover:bg-white/8 hover:text-white">Home</Link>
+            <Link href="/tools" className="rounded-md px-3 py-1.5 text-xs text-gray-400 transition hover:bg-white/8 hover:text-white">Tools</Link>
+            <span className="ml-1 text-xs text-gray-600">/</span>
+            <span className="ml-1 text-xs font-semibold text-violet-400">JSON Tree Viewer</span>
+          </nav>
+        </div>
+        {data && (
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setExpandAll(true)} className="rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-300 transition hover:bg-white/10">Expand all</button>
+            <button type="button" onClick={() => setExpandAll(false)} className="rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-300 transition hover:bg-white/10">Collapse all</button>
           </div>
-        </Field>
+        )}
       </div>
-      <ErrorBanner message={error} />
+
+      {/* panels */}
+      <div className="flex min-h-0 flex-1 divide-x divide-white/10">
+        {/* input */}
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex h-9 shrink-0 items-center justify-between border-b border-white/10 px-4">
+            <span className="text-xs font-semibold text-gray-400">Input JSON</span>
+            {input && <button type="button" onClick={() => setInput("")} className="text-xs text-gray-500 transition hover:text-gray-300">Clear</button>}
+          </div>
+          <div className="min-h-0 flex-1 p-3">
+            <div className="relative h-full overflow-hidden rounded-lg border border-white/8 bg-[#0d1117]">
+              <textarea value={input} onChange={(e) => setInput(e.target.value)} spellCheck={false} className={ta} style={{ lineHeight: "20px" }} />
+            </div>
+          </div>
+          {error && (
+            <div className="shrink-0 border-t border-red-900/50 bg-red-950/40 px-4 py-2.5">
+              <div className="flex items-start gap-2">
+                <Icon name="zap" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-400" />
+                <p className="text-xs leading-relaxed text-red-400">{error}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* tree */}
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex h-9 shrink-0 items-center justify-between border-b border-white/10 px-4">
+            <span className="text-xs font-semibold text-gray-400">Interactive tree</span>
+          </div>
+          <div className="min-h-0 flex-1 overflow-auto p-3">
+            {data ? (
+              <div className="font-mono text-[13px]" style={{ lineHeight: "22px" }}>
+                <TreeNode value={data} depth={0} expandAll={expandAll} />
+              </div>
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <p className="text-xs text-gray-600">{error ? "Fix errors to see the tree" : "Paste JSON in the input panel"}</p>
+              </div>
+            )}
+          </div>
+          <div className="shrink-0 border-t border-white/10 px-4 py-2">
+            <p className="text-xs text-gray-600">{data ? "Click any node to expand or collapse · processed locally" : "Paste or type JSON in the input panel"}</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -155,6 +155,30 @@ export default function Icon({ name, className = "w-5 h-5" }) {
           <path d="M17 7c-2 0-3.5 1.5-3.5 3.5S15 14 17 14c0 2-1.5 3.5-3 3.5" />
         </svg>
       );
+    case "maximize":
+      return (
+        <svg {...props}>
+          <polyline points="15 3 21 3 21 9" />
+          <polyline points="9 21 3 21 3 15" />
+          <line x1="21" y1="3" x2="14" y2="10" />
+          <line x1="3" y1="21" x2="10" y2="14" />
+        </svg>
+      );
+    case "copy":
+      return (
+        <svg {...props}>
+          <rect x="9" y="9" width="13" height="13" rx="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+      );
+    case "download":
+      return (
+        <svg {...props}>
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+      );
     default:
       return null;
   }

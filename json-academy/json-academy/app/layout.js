@@ -6,6 +6,7 @@ import "@fontsource/jetbrains-mono/800.css";
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata = {
   metadataBase: new URL("https://www.jsonacademy.com"),
@@ -36,10 +37,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="font-mono bg-[#f9fafb] text-[#171717] antialiased">
-        {children}
-        <SpeedInsights />
-        <Analytics />
+      <body className="font-mono antialiased" style={{ backgroundColor: "var(--color-bg, #f9fafb)", color: "var(--color-ink, #171717)" }}>
+        <ThemeProvider>
+          {children}
+          <SpeedInsights />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   );

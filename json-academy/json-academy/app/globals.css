@@ -2,11 +2,32 @@
 
 @theme inline {
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --color-brand: #8b5cf6;
-  --color-brand-dark: #7c3aed;
-  --color-ink: #171717;
-  --color-sub: #6b7280;
-  --color-line: #e5e7eb;
+  --color-brand: #334155;
+  --color-brand-dark: #1e293b;
+  --color-brand-50: #f1f5f9;
+  --color-brand-100: #e2e8f0;
+  --color-brand-text: #1e293b;
+  --color-ink: #0f172a;
+  --color-sub: #64748b;
+  --color-line: #e2e8f0;
+  --color-surface: #ffffff;
+  --color-bg: #f8fafc;
+  --color-dot: #cbd5e1;
+}
+
+/* Default root CSS vars (overridden by ThemeProvider JS) — matches Midnight (slate) */
+:root {
+  --color-brand:      #334155;
+  --color-brand-dark: #1e293b;
+  --color-brand-50:   #f1f5f9;
+  --color-brand-100:  #e2e8f0;
+  --color-brand-text: #1e293b;
+  --color-dot:        #cbd5e1;
+  --color-bg:         #f8fafc;
+  --color-ink:        #0f172a;
+  --color-sub:        #64748b;
+  --color-line:       #e2e8f0;
+  --color-surface:    #ffffff;
 }
 
 html {
@@ -14,12 +35,14 @@ html {
 }
 
 body {
-  background-color: #f9fafb;
-  background-image: radial-gradient(circle, #d8dce1 1px, transparent 1px);
+  background-color: var(--color-bg);
+  background-image: radial-gradient(circle, var(--color-dot) 1px, transparent 1px);
   background-size: 32px 32px;
+  color: var(--color-ink);
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 ::selection {
-  background: #8b5cf6;
+  background: var(--color-brand);
   color: #fff;
 }

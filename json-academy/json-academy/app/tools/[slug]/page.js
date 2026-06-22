@@ -71,13 +71,13 @@ export default async function ToolPage({ params }) {
       <Nav active="tools" />
 
       <section className="mx-auto max-w-6xl px-6 pb-10 pt-6">
-        <div className="flex gap-6">
+        <div className="flex gap-5 items-start">
           <ToolRail activeSlug={tool.slug} />
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 sm:hidden">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:hidden" style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
                   <Icon name={tool.icon} className="w-5 h-5" />
                 </div>
                 <div>
@@ -85,7 +85,7 @@ export default async function ToolPage({ params }) {
                   <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{tool.title}</h1>
                 </div>
               </div>
-              <p className="text-sm font-medium text-violet-500">{tool.sub}</p>
+              <p className="text-sm font-medium" style={{ color: "var(--color-brand)" }}>{tool.sub}</p>
             </div>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-500">{tool.intro}</p>
 
@@ -96,7 +96,7 @@ export default async function ToolPage({ params }) {
             <div className="mt-16 grid gap-x-10 gap-y-10 sm:grid-cols-3">
               {tool.features.map((f) => (
                 <div key={f.title}>
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
+                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg" style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
                     <Icon name="check-circle" className="w-4 h-4" />
                   </div>
                   <h3 className="text-base font-bold">{f.title}</h3>
@@ -126,12 +126,12 @@ export default async function ToolPage({ params }) {
               <h2 className="text-2xl font-extrabold">Other tools</h2>
               <div className="mt-6 grid gap-5 md:grid-cols-3">
                 {related.map((t) => (
-                  <a key={t.slug} href={`/tools/${t.slug}`} className="group rounded-2xl border border-gray-200 bg-white p-6 transition hover:border-violet-200 hover:shadow-md">
+                  <a key={t.slug} href={`/tools/${t.slug}`} className="group rounded-2xl border p-6 transition hover:shadow-md" style={{ borderColor: "var(--color-line)", backgroundColor: "var(--color-surface)" }}>
                     <div className="flex items-start justify-between">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
                         <Icon name={t.icon} className="w-5 h-5" />
                       </div>
-                      <Icon name="arrow-right" className="w-4 h-4 text-gray-300 transition group-hover:translate-x-0.5 group-hover:text-violet-500" />
+                      <Icon name="arrow-right" className="w-4 h-4 text-gray-300 transition group-hover:translate-x-0.5" />
                     </div>
                     <h3 className="mt-5 text-lg font-bold">{t.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-gray-500">{t.shortDesc}</p>

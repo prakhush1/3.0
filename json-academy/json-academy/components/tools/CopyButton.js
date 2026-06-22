@@ -21,7 +21,12 @@ export default function CopyButton({ text, label = "Copy" }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#171717] hover:bg-gray-50"
+      className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition hover:opacity-80"
+      style={{
+        borderColor: "var(--color-line)",
+        backgroundColor: "var(--color-surface)",
+        color: "var(--color-ink)",
+      }}
     >
       <Icon name={copied ? "check-circle" : "braces"} className="w-3.5 h-3.5" />
       {copied ? "Copied!" : label}

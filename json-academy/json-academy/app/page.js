@@ -17,7 +17,10 @@ const PATH_TOOL = TOOLS.find((t) => t.slug === "json-path-extractor");
 
 function Badge({ children }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3.5 py-1.5 text-xs font-medium text-violet-600">
+    <span
+      className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium"
+      style={{ borderColor: "var(--color-brand-100)", backgroundColor: "var(--color-brand-50)", color: "var(--color-brand-text)" }}
+    >
       {children}
     </span>
   );
@@ -26,11 +29,14 @@ function Badge({ children }) {
 function Card({ icon, tag, title, desc }) {
   return (
     <div>
-      <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+      <div
+        className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl"
+        style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}
+      >
         <Icon name={icon} className="w-5 h-5" />
       </div>
       <p className="mb-1 text-xs text-gray-400">{tag}</p>
-      <h3 className="mb-2 text-lg font-bold text-[#171717]">{title}</h3>
+      <h3 className="mb-2 text-lg font-bold" style={{ color: "var(--color-ink)" }}>{title}</h3>
       <p className="text-sm leading-relaxed text-gray-500">{desc}</p>
     </div>
   );
@@ -51,9 +57,9 @@ export default function Home() {
             <h1 className="mt-6 text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
               The complete
               <br />
-              <span className="text-violet-500">JSON</span>
+              <span style={{ color: "var(--color-brand)" }}>JSON</span>
               <br />
-              toolkit<span className="text-violet-500">.</span>
+              toolkit<span style={{ color: "var(--color-brand)" }}>.</span>
             </h1>
             <p className="mt-6 max-w-md text-base leading-relaxed text-gray-500">
               Format, validate, minify, convert, and compare JSON — all in one
@@ -61,10 +67,14 @@ export default function Home() {
               your browser.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a href="/tools" className="flex items-center gap-2 rounded-lg bg-violet-500 px-5 py-3 text-sm font-semibold text-white hover:bg-violet-600">
+              <a
+                href="/tools"
+                className="flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                style={{ backgroundColor: "var(--color-brand)" }}
+              >
                 Explore Tools <Icon name="arrow-right" className="w-4 h-4" />
               </a>
-              <a href="#" className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-[#171717] hover:bg-gray-50">
+              <a href="#" className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-3 text-sm font-semibold hover:bg-gray-50" style={{ color: "var(--color-ink)" }}>
                 <Icon name="play" className="w-3.5 h-3.5" /> Why Us
               </a>
             </div>
@@ -98,11 +108,15 @@ export default function Home() {
 <span className="text-[#9cdcfe]">  &quot;speed&quot;</span><span className="text-gray-500"> : </span><span className="text-[#7ee787]">&quot;instant&quot;</span>{"\n"}
 <span className="text-gray-500">{"}"}</span>
               </code></pre>
-              <p className="mt-3 text-[13px] text-violet-400">
-                <span className="text-gray-500">→</span> <span className="inline-block h-3.5 w-2 animate-pulse bg-violet-400 align-middle" />
+              <p className="mt-3 text-[13px]" style={{ color: "var(--color-brand)" }}>
+                <span className="text-gray-500">→</span>{" "}
+                <span className="inline-block h-3.5 w-2 animate-pulse align-middle" style={{ backgroundColor: "var(--color-brand)" }} />
               </p>
             </div>
-            <div className="pointer-events-none absolute -bottom-8 -right-6 h-28 w-28 rounded-full bg-gradient-to-br from-violet-300/40 to-violet-500/10 blur-xl" />
+            <div
+              className="pointer-events-none absolute -bottom-8 -right-6 h-28 w-28 rounded-full blur-xl"
+              style={{ background: `radial-gradient(circle, color-mix(in srgb, var(--color-brand) 30%, transparent), color-mix(in srgb, var(--color-brand) 10%, transparent))` }}
+            />
           </div>
         </div>
 
@@ -114,9 +128,9 @@ export default function Home() {
       {/* FEATURES */}
       <section className="mx-auto max-w-6xl px-6 py-20">
         <div className="text-center">
-          <p className="text-xs font-bold tracking-widest text-violet-500">// FEATURES</p>
+          <p className="text-xs font-bold tracking-widest" style={{ color: "var(--color-brand)" }}>// FEATURES</p>
           <h2 className="mt-3 text-4xl font-extrabold sm:text-5xl">
-            Built for <span className="text-violet-400">developers</span>
+            Built for <span style={{ color: "var(--color-brand)" }}>developers</span>
           </h2>
           <p className="mx-auto mt-4 max-w-md text-sm text-gray-500">
             Every tool is designed to be fast, reliable, and respectful of
@@ -135,22 +149,31 @@ export default function Home() {
       <section id="tools" className="mx-auto max-w-6xl px-6 py-16">
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-xs font-bold tracking-widest text-violet-500">// TOOLS</p>
+            <p className="text-xs font-bold tracking-widest" style={{ color: "var(--color-brand)" }}>// TOOLS</p>
             <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">The JSON Toolbox</h2>
           </div>
-          <a href="/tools" className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50">
+          <a
+            href="/tools"
+            className="flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold transition hover:opacity-80"
+            style={{ borderColor: "var(--color-line)", backgroundColor: "var(--color-surface)", color: "var(--color-ink)" }}
+          >
             View All <Icon name="arrow-right" className="w-3.5 h-3.5" />
           </a>
         </div>
 
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {FEATURED_TOOLS.map((t) => (
-            <a key={t.slug} href={`/tools/${t.slug}`} className="group rounded-2xl border border-gray-200 bg-white p-6 transition hover:border-violet-200 hover:shadow-md">
+            <a
+              key={t.slug}
+              href={`/tools/${t.slug}`}
+              className="group rounded-2xl border p-6 transition hover:shadow-md"
+              style={{ borderColor: "var(--color-line)", backgroundColor: "var(--color-surface)" }}
+            >
               <div className="flex items-start justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
                   <Icon name={t.icon} className="w-5 h-5" />
                 </div>
-                <Icon name="arrow-right" className="w-4 h-4 text-gray-300 transition group-hover:translate-x-0.5 group-hover:text-violet-500" />
+                <Icon name="arrow-right" className="w-4 h-4 text-gray-300 transition group-hover:translate-x-0.5" />
               </div>
               <p className="mt-5 text-xs text-gray-400">{t.tag}</p>
               <h3 className="mt-1 text-lg font-bold">{t.title}</h3>
@@ -159,9 +182,13 @@ export default function Home() {
           ))}
         </div>
 
-        <a href={`/tools/${PATH_TOOL.slug}`} className="group mt-5 flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6 transition hover:border-violet-200 hover:shadow-md">
+        <a
+          href={`/tools/${PATH_TOOL.slug}`}
+          className="group mt-5 flex items-center justify-between rounded-2xl border p-6 transition hover:shadow-md"
+          style={{ borderColor: "var(--color-line)", backgroundColor: "var(--color-surface)" }}
+        >
           <div className="flex items-center gap-5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
               <Icon name="crosshair" className="w-5 h-5" />
             </div>
             <div>
@@ -169,28 +196,32 @@ export default function Home() {
               <p className="mt-1 text-sm text-gray-500">{PATH_TOOL.shortDesc}</p>
             </div>
           </div>
-          <Icon name="arrow-right" className="w-4 h-4 shrink-0 text-gray-300 transition group-hover:translate-x-0.5 group-hover:text-violet-500" />
+          <Icon name="arrow-right" className="w-4 h-4 shrink-0 text-gray-300 transition group-hover:translate-x-0.5" />
         </a>
       </section>
 
       {/* CTA */}
       <section className="mx-auto max-w-6xl px-6 py-16">
         <div className="relative overflow-hidden rounded-3xl bg-[#2f3236] text-center text-white">
-          <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-violet-400/20 blur-3xl" />
+          <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full blur-3xl" style={{ backgroundColor: "color-mix(in srgb, var(--color-brand) 20%, transparent)" }} />
           <div className="relative px-6 py-16">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-violet-300">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white/10" style={{ color: "var(--color-brand)" }}>
               <Icon name="code" className="w-5 h-5" />
             </div>
             <h2 className="mt-6 text-4xl font-extrabold leading-tight sm:text-5xl">
               Ready to work
               <br />
-              with data<span className="text-violet-400">?</span>
+              with data<span style={{ color: "var(--color-brand)" }}>?</span>
             </h2>
             <p className="mx-auto mt-4 max-w-md text-sm text-gray-300">
               Pick a tool and start working. No sign-up, no downloads, no fees.
               Just clean, fast JSON utilities.
             </p>
-            <a href="/tools" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-violet-400 px-6 py-3 text-sm font-semibold text-[#1d1d22] hover:bg-violet-300">
+            <a
+              href="/tools"
+              className="mt-8 inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold transition hover:opacity-90"
+              style={{ backgroundColor: "var(--color-brand)", color: "#ffffff" }}
+            >
               Browse All Tools <Icon name="arrow-right" className="w-4 h-4" />
             </a>
           </div>

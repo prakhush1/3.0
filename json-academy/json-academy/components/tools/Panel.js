@@ -4,7 +4,7 @@ export function Field({ label, action, children }) {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs font-semibold text-gray-500">{label}</p>
+        <p className="text-xs font-semibold" style={{ color: "var(--color-sub)" }}>{label}</p>
         {action}
       </div>
       {children}
@@ -22,7 +22,22 @@ export function ErrorBanner({ message }) {
 }
 
 export const taClass =
-  "h-64 w-full resize-none rounded-lg border border-gray-200 bg-[#0d1117] p-4 font-mono text-[13px] text-gray-200 outline-none focus:border-violet-400";
+  "h-64 w-full resize-none rounded-lg border p-4 font-mono text-[13px] text-gray-200 outline-none transition-colors";
+
+export const taStyle = {
+  borderColor: "var(--color-line)",
+  backgroundColor: "#0d1117",
+};
+
+export const taFocusStyle = {
+  borderColor: "var(--color-brand)",
+};
 
 export const taLightClass =
-  "h-64 w-full resize-none rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-[13px] text-[#171717] outline-none focus:border-violet-400";
+  "h-64 w-full resize-none rounded-lg border p-4 font-mono text-[13px] outline-none transition-colors";
+
+export const taLightStyle = {
+  borderColor: "var(--color-line)",
+  backgroundColor: "var(--color-brand-50)",
+  color: "var(--color-ink)",
+};

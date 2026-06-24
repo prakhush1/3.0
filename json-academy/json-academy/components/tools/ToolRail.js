@@ -18,15 +18,15 @@ export default function ToolRail({ activeSlug }) {
 
   return (
     <aside
-      className="sticky top-24 hidden h-fit shrink-0 flex-col sm:flex transition-all duration-300"
+      className="hidden h-full shrink-0 flex-col sm:flex transition-all duration-300 overflow-y-auto"
       style={{
         width: collapsed ? "56px" : "220px",
         minWidth: collapsed ? "56px" : "220px",
       }}
     >
       <div
-        className="rounded-2xl border overflow-hidden"
-        style={{ borderColor: "var(--color-line)", backgroundColor: "var(--color-surface)" }}
+        className="h-full overflow-hidden flex flex-col"
+        style={{ borderRight: "1px solid var(--color-line)", backgroundColor: "var(--color-surface)" }}
       >
         {/* Header */}
         <div

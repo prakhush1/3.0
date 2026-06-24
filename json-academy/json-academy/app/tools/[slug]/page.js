@@ -14,23 +14,10 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   const tool = getToolBySlug(slug);
   if (!tool) return {};
-  const title = `${tool.title} — Free Online Tool`;
   return {
-    title,
-    description: tool.shortDesc,
-    keywords: tool.keywords,
-    alternates: { canonical: `/tools/${tool.slug}` },
-    openGraph: {
-      title: `${title} | JSON Academy`,
-      description: tool.shortDesc,
-      url: `https://www.jsonacademy.com/tools/${tool.slug}`,
-      type: "website",
-    },
-    twitter: {
-      card: "summary",
-      title: `${title} | JSON Academy`,
-      description: tool.shortDesc,
-    },
+    title: `${tool.title} — JSON Academy`,
+    description: tool.intro,
+    openGraph: { title: `${tool.title} — JSON Academy`, description: tool.intro },
   };
 }
 
@@ -39,18 +26,20 @@ export default async function ToolPage({ params }) {
   const tool = getToolBySlug(slug);
   if (!tool) notFound();
 
-  const Widget = WIDGETS[tool.slug];
-  const related = TOOLS.filter((t) => t.slug !== tool.slug).slice(0, 3);
+  const related = TOOLS.filter((t) => t.slug !== slug).slice(0, 3);
+  const Widget = WIDGETS[slug] ?? null;
+
+  /* Full-bleed tools (e.g. formatter) take over below the Nav */
+  const isFullBleed = !!Widget?.fullBleed;
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+    "@type": "WebApplication",
     name: tool.title,
+    description: tool.intro,
     applicationCategory: "DeveloperApplication",
-    operatingSystem: "Any (runs in browser)",
-    description: tool.shortDesc,
+    operatingSystem: "All",
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    url: `https://www.jsonacademy.com/tools/${tool.slug}`,
   };
 
   const faqLd = {
@@ -63,6 +52,28 @@ export default async function ToolPage({ params }) {
     })),
   };
 
+  /* ── Full-bleed layout ── */
+  if (isFullBleed) {
+    return (
+      <main className="flex flex-col" style={{ height: "100dvh", overflow: "hidden" }}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          {/* Sidebar */}
+          <div className="hidden sm:flex shrink-0">
+            <ToolRail activeSlug={tool.slug} />
+          </div>
+          {/* Full-height widget */}
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <Widget />
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  /* ── Normal padded layout ── */
   return (
     <main className="overflow-x-hidden">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -77,7 +88,8 @@ export default async function ToolPage({ params }) {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:hidden" style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:hidden"
+                  style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
                   <Icon name={tool.icon} className="w-5 h-5" />
                 </div>
                 <div>
@@ -96,7 +108,8 @@ export default async function ToolPage({ params }) {
             <div className="mt-16 grid gap-x-10 gap-y-10 sm:grid-cols-3">
               {tool.features.map((f) => (
                 <div key={f.title}>
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg" style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
+                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg"
+                    style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
                     <Icon name="check-circle" className="w-4 h-4" />
                   </div>
                   <h3 className="text-base font-bold">{f.title}</h3>
@@ -126,9 +139,12 @@ export default async function ToolPage({ params }) {
               <h2 className="text-2xl font-extrabold">Other tools</h2>
               <div className="mt-6 grid gap-5 md:grid-cols-3">
                 {related.map((t) => (
-                  <a key={t.slug} href={`/tools/${t.slug}`} className="group rounded-2xl border p-6 transition hover:shadow-md" style={{ borderColor: "var(--color-line)", backgroundColor: "var(--color-surface)" }}>
+                  <a key={t.slug} href={`/tools/${t.slug}`}
+                    className="group rounded-2xl border p-6 transition hover:shadow-md"
+                    style={{ borderColor: "var(--color-line)", backgroundColor: "var(--color-surface)" }}>
                     <div className="flex items-start justify-between">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl"
+                        style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
                         <Icon name={t.icon} className="w-5 h-5" />
                       </div>
                       <Icon name="arrow-right" className="w-4 h-4 text-gray-300 transition group-hover:translate-x-0.5" />

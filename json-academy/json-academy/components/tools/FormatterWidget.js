@@ -8,11 +8,9 @@ import FormatterToolPanel from "@/components/tools/FormatterToolPanel";
 
 /* ─── helpers ─────────────────────────────────────────── */
 
-const SAMPLE = `{"name":"JSON Academy","tools":9,"private":true,"tags":["json","tools","free"],"meta":{"version":2,"active":true}}`;
-
 let _uid = 0;
 function uid() { return ++_uid; }
-function makeWindow(n) { return { id: uid(), label: `Window ${n}`, input: SAMPLE, indent: 2 }; }
+function makeWindow(n) { return { id: uid(), label: `Window ${n}`, input: "", indent: 2 }; }
 
 function parseJSON(raw) {
   if (!raw.trim()) return { parsed: null, error: "", errorLine: null, errorCol: null };
@@ -167,9 +165,9 @@ function StatusDot({ error, empty }) {
 function AnnotatedEditor({ value, onChange, errorLine, readOnly = false, placeholder, theme }) {
   const scrollRef = useRef(null);
   const taRef = useRef(null);
-  const isMultiline = (value || "").includes("\n");
-  const lineText = (value || "").split("\n").map((t) => `  ${t}`).join("\n").slice(2);
-  const displayValue = isMultiline ? value : lineText;
+  const handleChange = useCallback((e) => {
+    onChange(e.target.value);
+  }, [onChange]);
   const syncScroll = useCallback(() => {
       if (scrollRef.current && taRef.current) {
         scrollRef.current.scrollTop = taRef.current.scrollTop;
@@ -196,10 +194,7 @@ function AnnotatedEditor({ value, onChange, errorLine, readOnly = false, placeho
           );
         })}
       </div>
-      <textarea ref={taRef} readOnly={readOnly} value={displayValue} onChange={(e) => {
-          const raw = e.target.value;
-          onChange(isMultiline ? raw : raw.replace(/^  /, ""));
-        }}
+      <textarea ref={taRef} readOnly={readOnly} value={value || ""} onChange={handleChange}
         onScroll={syncScroll} placeholder={placeholder} spellCheck={false}
         className="absolute inset-0 h-full w-full resize-none bg-transparent py-3 pr-4 outline-none"
               style={{ paddingLeft: 44, lineHeight: "20px", color: theme.editorFg, caretColor: theme.accent, whiteSpace: "pre-wrap", overflowWrap: "break-word", overflowX: "hidden", overflowY: "auto" }} />
@@ -313,7 +308,7 @@ function FormatterPane({ win, onChange, et }) {
           </div>
         </div>
         <div className="min-h-0 flex-1 p-3">
-          <AnnotatedEditor value={input} onChange={e => onChange({ input: e.target.value })} errorLine={errorLine} theme={et} />
+          <AnnotatedEditor value={input} onChange={v => onChange({ input: v })} errorLine={errorLine} placeholder='Paste or type JSON here, e.g. {"name":"value"}' theme={et} />
         </div>
         {error && (
           <div className="shrink-0 px-4 py-2.5"

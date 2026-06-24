@@ -222,6 +222,29 @@ export const TOOLS = [
       { q: "What if my token is expired?", a: "The decoder still shows its contents but flags the exp claim in red and surfaces an 'Expired' badge in the top bar." },
     ],
   },
+  {
+    slug: "sql-formatter",
+    icon: "braces",
+    tag: '"sql":',
+    title: "SQL Formatter",
+    sub: "Beautify queries",
+    category: "Format",
+    shortDesc:
+      "Format messy SQL into a clean, indented query with keywords uppercased — supports SELECT, JOINs, WHERE, GROUP BY, ORDER BY and more.",
+    intro:
+      "Paste minified SQL or a query sprawled across one long line and instantly get a readable, indented version with keywords uppercased, joins indented under FROM, and clauses on their own lines. Pick 2-space, 4-space, or tab indentation, switch to lower-case keywords, or minify for transport — all processed locally in your browser.",
+    keywords: ["sql formatter", "sql beautifier", "format sql online", "pretty print sql", "sql minifier"],
+    features: [
+      { title: "Smart clause layout", desc: "SELECT, FROM, WHERE, GROUP BY, ORDER BY and JOINs each get their own line at the right indent." },
+      { title: "Keyword case toggle", desc: "Switch between UPPER and lower-case keywords without touching identifiers or literals." },
+      { title: "Minify mode", desc: "Collapse any query to a single line for transport or storage." },
+    ],
+    faqs: [
+      { q: "Which SQL dialects are supported?", a: "The formatter handles standard SQL — SELECT/FROM/WHERE/GROUP BY/ORDER BY, JOINs (LEFT, RIGHT, INNER, OUTER, FULL, CROSS), subqueries in parentheses, and CASE expressions." },
+      { q: "Does it send my SQL to a server?", a: "No. Tokenisation and reformatting happen entirely in your browser — nothing is uploaded." },
+      { q: "Will it round-trip my data?", a: "Yes. Only whitespace, line breaks, and keyword case change — identifiers, literals, and comments are preserved exactly." },
+    ],
+  },
 ];
 
 export function getToolBySlug(slug) {

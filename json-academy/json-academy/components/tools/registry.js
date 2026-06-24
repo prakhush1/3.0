@@ -8,6 +8,7 @@ import PathExtractorWidget from "@/components/tools/PathExtractorWidget";
 import EscapeWidget from "@/components/tools/EscapeWidget";
 import UnescapeWidget from "@/components/tools/UnescapeWidget";
 import JwtDecoderWidget from "@/components/tools/JwtDecoderWidget";
+import SqlFormatterWidget from "@/components/tools/SqlFormatterWidget";
 
 FormatterWidget.fullBleed = true;
 ValidatorWidget.fullBleed = true;
@@ -19,6 +20,7 @@ PathExtractorWidget.fullBleed = true;
 EscapeWidget.fullBleed = true;
 UnescapeWidget.fullBleed = true;
 JwtDecoderWidget.fullBleed = true;
+SqlFormatterWidget.fullBleed = true;
 
 export const WIDGETS = {
   "json-formatter": FormatterWidget,
@@ -31,4 +33,5 @@ export const WIDGETS = {
   "json-escape": EscapeWidget,
   "json-unescape": UnescapeWidget,
   "jwt-decoder": JwtDecoderWidget,
+  "sql-formatter": SqlFormatterWidget,
 };

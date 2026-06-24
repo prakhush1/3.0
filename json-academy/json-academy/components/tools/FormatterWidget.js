@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Icon from "@/components/Icon";
 import { EDITOR_THEMES, DEFAULT_EDITOR_THEME_ID, EDITOR_THEME_STORAGE_KEY } from "@/lib/themes";
+import FormatterToolPanel from "@/components/tools/FormatterToolPanel";
 
 /* ─── helpers ─────────────────────────────────────────── */
 
@@ -624,57 +625,64 @@ export default function FormatterWidget() {
   const activeWin = windows.find(w => w.id === activeId) ?? windows[0];
 
   return (
-    <div className="fixed inset-0 flex flex-col overflow-hidden transition-colors" style={{ backgroundColor: et.wrapperBg }}>
+    <div className="fixed inset-0 flex overflow-hidden transition-colors" style={{ backgroundColor: et.wrapperBg }}>
 
-      {/* ── Top bar ── */}
-      <div className="flex h-12 shrink-0 items-center justify-between px-4"
-        style={{ backgroundColor: et.shell, borderBottom: `1px solid ${et.shellBorder}` }}>
-        <div className="flex items-center gap-5">
-          <Link href="/" className="flex items-center gap-1.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md" style={{ backgroundColor: et.accent, color: et.accentFg }}>
-              <Icon name="code" className="w-3.5 h-3.5" />
-            </span>
-            <span className="hidden text-sm font-bold sm:block" style={{ color: et.editorFg }}>
-              <span style={{ color: et.accent }}>&#123;JSON&#125;</span> Academy
-            </span>
-          </Link>
-          <nav className="flex items-center gap-1">
-            <Link href="/" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: et.labelFg }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = et.editorFg; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = et.labelFg; }}>Home</Link>
-            <Link href="/tools" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: et.labelFg }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = et.editorFg; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = et.labelFg; }}>Tools</Link>
-            <span className="ml-1 text-xs" style={{ color: et.gutterFg }}>/</span>
-            <span className="ml-1 text-xs font-semibold" style={{ color: et.accent }}>JSON Formatter</span>
-          </nav>
+        {/* ── Left tool navigation panel (theme-aware, collapsible) ── */}
+        <FormatterToolPanel theme={et} activeSlug="json-formatter" />
+
+        {/* ── Main column ── */}
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+
+          {/* ── Top bar ── */}
+          <div className="flex h-12 shrink-0 items-center justify-between px-4"
+            style={{ backgroundColor: et.shell, borderBottom: `1px solid ${et.shellBorder}` }}>
+            <div className="flex items-center gap-5">
+              <Link href="/" className="flex items-center gap-1.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-md" style={{ backgroundColor: et.accent, color: et.accentFg }}>
+                  <Icon name="code" className="w-3.5 h-3.5" />
+                </span>
+                <span className="hidden text-sm font-bold sm:block" style={{ color: et.editorFg }}>
+                  <span style={{ color: et.accent }}>&#123;JSON&#125;</span> Academy
+                </span>
+              </Link>
+              <nav className="flex items-center gap-1">
+                <Link href="/" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: et.labelFg }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = et.editorFg; }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = et.labelFg; }}>Home</Link>
+                <Link href="/tools" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: et.labelFg }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = et.editorFg; }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = et.labelFg; }}>Tools</Link>
+                <span className="ml-1 text-xs" style={{ color: et.gutterFg }}>/</span>
+                <span className="ml-1 text-xs font-semibold" style={{ color: et.accent }}>JSON Formatter</span>
+              </nav>
+            </div>
+            <EditorThemePicker theme={et} setTheme={setEditorTheme} />
+          </div>
+
+          {/* ── Window tab bar + [ + New Window ] button ── */}
+          <WindowTabBar
+            windows={windows}
+            activeId={activeId}
+            onSelect={setActiveId}
+            onClose={closeWindow}
+            onAdd={addWindow}
+            onRename={renameWindow}
+            et={et}
+          />
+
+          {/* ── Active formatter pane ── */}
+          {activeWin && (
+            <FormatterPane
+              key={activeWin.id}
+              win={activeWin}
+              onChange={patch => updateWindow(activeWin.id, patch)}
+              et={et}
+            />
+          )}
         </div>
-        <EditorThemePicker theme={et} setTheme={setEditorTheme} />
       </div>
-
-      {/* ── Window tab bar + [ + New Window ] button ── */}
-      <WindowTabBar
-        windows={windows}
-        activeId={activeId}
-        onSelect={setActiveId}
-        onClose={closeWindow}
-        onAdd={addWindow}
-        onRename={renameWindow}
-        et={et}
-      />
-
-      {/* ── Active formatter pane ── */}
-      {activeWin && (
-        <FormatterPane
-          key={activeWin.id}
-          win={activeWin}
-          onChange={patch => updateWindow(activeWin.id, patch)}
-          et={et}
-        />
-      )}
-    </div>
-  );
-}
+    );
+  }
 
 /* Mark this widget as full-bleed so the page layout skips its normal chrome */
 FormatterWidget.fullBleed = true;

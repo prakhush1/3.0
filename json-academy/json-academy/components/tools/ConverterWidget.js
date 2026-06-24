@@ -3,6 +3,8 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Icon from "@/components/Icon";
+import FormatterToolPanel from "@/components/tools/FormatterToolPanel";
+import useEditorTheme from "@/components/tools/useEditorTheme";
 
 const SAMPLE_JSON = `[
   { "id": 1, "name": "Ada Lovelace", "role": "Engineer" },
@@ -44,21 +46,54 @@ function csvToJson(text) {
 }
 
 /* ─── sub-components ─────────────────────────────────── */
-function ToolbarBtn({ onClick, children }) {
+function ToolbarBtn({ onClick, children, theme }) {
   return (
-    <button type="button" onClick={onClick} className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-300 transition hover:bg-white/10 active:scale-95">
+    <button type="button" onClick={onClick} className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition active:scale-95"
+      style={{ border: `1px solid ${theme.btnBorder}`, color: theme.btnFg }}
+      onMouseEnter={e => { e.currentTarget.style.backgroundColor = theme.btnHover; }}
+      onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
       {children}
     </button>
   );
 }
 
-const ta = "absolute inset-0 h-full w-full resize-none bg-transparent py-3 px-4 font-mono text-[13px] text-gray-200 outline-none placeholder:text-gray-600 focus:ring-1 focus:ring-inset focus:ring-violet-500";
+function TopBar({ title, right, theme }) {
+  return (
+    <div className="flex h-12 shrink-0 items-center justify-between px-4"
+      style={{ backgroundColor: theme.shell, borderBottom: `1px solid ${theme.shellBorder}` }}>
+      <div className="flex items-center gap-5">
+        <Link href="/" className="flex items-center gap-1.5">
+          <span className="flex h-7 w-7 items-center justify-center rounded-md" style={{ backgroundColor: theme.accent, color: theme.accentFg }}>
+            <Icon name="code" className="w-3.5 h-3.5" />
+          </span>
+          <span className="hidden text-sm font-bold sm:block" style={{ color: theme.editorFg }}>
+            <span style={{ color: theme.accent }}>&#123;JSON&#125;</span> Academy
+          </span>
+        </Link>
+        <nav className="flex items-center gap-1">
+          <Link href="/" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: theme.labelFg }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = theme.btnHover; e.currentTarget.style.color = theme.editorFg; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = theme.labelFg; }}>Home</Link>
+          <Link href="/tools" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: theme.labelFg }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = theme.btnHover; e.currentTarget.style.color = theme.editorFg; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = theme.labelFg; }}>Tools</Link>
+          <span className="ml-1 text-xs" style={{ color: theme.gutterFg }}>/</span>
+          <span className="ml-1 text-xs font-semibold" style={{ color: theme.accent }}>{title}</span>
+        </nav>
+      </div>
+      <div className="flex items-center gap-2">{right}</div>
+    </div>
+  );
+}
+
+const ta = "absolute inset-0 h-full w-full resize-none bg-transparent py-3 px-4 outline-none placeholder:text-gray-600 focus:ring-1 focus:ring-inset font-mono text-[13px]";
 
 /* ─── main ───────────────────────────────────────────── */
 export default function ConverterWidget() {
   const [dir, setDir] = useState("json-csv");
   const [input, setInput] = useState(SAMPLE_JSON);
   const [copied, setCopied] = useState(false);
+  const { theme: et } = useEditorTheme();
 
   const { output, error } = useMemo(() => {
     if (!input.trim()) return { output: "", error: "" };
@@ -87,71 +122,61 @@ export default function ConverterWidget() {
   const outputLabel = dir === "json-csv" ? "CSV output" : "JSON output";
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-[#0d1117]">
-      {/* top bar */}
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-white/10 px-4">
-        <div className="flex items-center gap-5">
-          <Link href="/" className="flex items-center gap-1.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-500 text-white"><Icon name="code" className="w-3.5 h-3.5" /></span>
-            <span className="hidden text-sm font-bold text-white sm:block"><span className="text-violet-400">&#123;JSON&#125;</span> Academy</span>
-          </Link>
-          <nav className="flex items-center gap-1">
-            <Link href="/" className="rounded-md px-3 py-1.5 text-xs text-gray-400 transition hover:bg-white/8 hover:text-white">Home</Link>
-            <Link href="/tools" className="rounded-md px-3 py-1.5 text-xs text-gray-400 transition hover:bg-white/8 hover:text-white">Tools</Link>
-            <span className="ml-1 text-xs text-gray-600">/</span>
-            <span className="ml-1 text-xs font-semibold text-violet-400">JSON ↔ CSV Converter</span>
-          </nav>
-        </div>
-        <div className="flex items-center gap-2">
-          <ToolbarBtn onClick={swap}>
-            <Icon name="repeat" className="w-3.5 h-3.5" />
-            {dir === "json-csv" ? "JSON → CSV" : "CSV → JSON"}
-          </ToolbarBtn>
-          {output && (
-            <>
-              <ToolbarBtn onClick={handleCopy}><Icon name={copied ? "check-circle" : "copy"} className="w-3.5 h-3.5" />{copied ? "Copied!" : "Copy"}</ToolbarBtn>
-              <ToolbarBtn onClick={handleDownload}><Icon name="download" className="w-3.5 h-3.5" /><span className="hidden sm:inline">Download</span><span className="sm:hidden">.{dir === "json-csv" ? "csv" : "json"}</span></ToolbarBtn>
-            </>
-          )}
-        </div>
-      </div>
+    <div className="fixed inset-0 flex overflow-hidden" style={{ backgroundColor: et.wrapperBg }}>
+      <FormatterToolPanel theme={et} activeSlug="json-csv-converter" />
 
-      {/* panels */}
-      <div className="flex min-h-0 flex-1 divide-x divide-white/10">
-        {/* input */}
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex h-9 shrink-0 items-center justify-between border-b border-white/10 px-4">
-            <span className="text-xs font-semibold text-gray-400">{inputLabel}</span>
-            {input && <button type="button" onClick={() => setInput("")} className="text-xs text-gray-500 transition hover:text-gray-300">Clear</button>}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TopBar theme={et} title="JSON ↔ CSV Converter" right={
+          <div className="flex items-center gap-2">
+            <ToolbarBtn theme={et} onClick={swap}>
+              <Icon name="repeat" className="w-3.5 h-3.5" />
+              {dir === "json-csv" ? "JSON → CSV" : "CSV → JSON"}
+            </ToolbarBtn>
+            {output && (
+              <>
+                <ToolbarBtn theme={et} onClick={handleCopy}><Icon name={copied ? "check-circle" : "copy"} className="w-3.5 h-3.5" />{copied ? "Copied!" : "Copy"}</ToolbarBtn>
+                <ToolbarBtn theme={et} onClick={handleDownload}><Icon name="download" className="w-3.5 h-3.5" /><span className="hidden sm:inline">Download</span><span className="sm:hidden">.{dir === "json-csv" ? "csv" : "json"}</span></ToolbarBtn>
+              </>
+            )}
           </div>
-          <div className="min-h-0 flex-1 p-3">
-            <div className="relative h-full overflow-hidden rounded-lg border border-white/8 bg-[#0d1117]">
-              <textarea value={input} onChange={(e) => setInput(e.target.value)} spellCheck={false} className={ta} style={{ lineHeight: "20px" }} />
+        } />
+
+        <div className="flex min-h-0 flex-1" style={{ borderTop: `1px solid ${et.shellBorder}` }}>
+          <div className="flex min-h-0 flex-1 flex-col" style={{ borderRight: `1px solid ${et.shellBorder}` }}>
+            <div className="flex h-9 shrink-0 items-center justify-between px-4" style={{ borderBottom: `1px solid ${et.shellBorder}` }}>
+              <span className="text-xs font-semibold" style={{ color: et.labelFg }}>{inputLabel}</span>
+              {input && <button type="button" onClick={() => setInput("")} className="text-xs transition" style={{ color: et.gutterFg }}>Clear</button>}
             </div>
-          </div>
-          {error && (
-            <div className="shrink-0 border-t border-red-900/50 bg-red-950/40 px-4 py-2.5">
-              <div className="flex items-start gap-2">
-                <Icon name="zap" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-400" />
-                <p className="text-xs leading-relaxed text-red-400">{error}</p>
+            <div className="min-h-0 flex-1 p-3">
+              <div className="relative h-full overflow-hidden rounded-lg" style={{ border: `1px solid ${et.shellBorder}`, backgroundColor: et.shell }}>
+                <textarea value={input} onChange={(e) => setInput(e.target.value)} spellCheck={false} className={ta}
+                  style={{ lineHeight: "20px", color: et.editorFg, "--tw-ring-color": et.accent }} />
               </div>
             </div>
-          )}
-        </div>
+            {error && (
+              <div className="shrink-0 px-4 py-2.5" style={{ borderTop: `1px solid ${et.divider}`, backgroundColor: et.footerBg }}>
+                <div className="flex items-start gap-2">
+                  <Icon name="zap" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-400" />
+                  <p className="text-xs leading-relaxed text-red-400">{error}</p>
+                </div>
+              </div>
+            )}
+          </div>
 
-        {/* output */}
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex h-9 shrink-0 items-center justify-between border-b border-white/10 px-4">
-            <span className="text-xs font-semibold text-gray-400">{outputLabel}</span>
-            {!output && error && <span className="text-xs text-gray-600">Fix errors to see output</span>}
-          </div>
-          <div className="min-h-0 flex-1 p-3">
-            <div className="relative h-full overflow-hidden rounded-lg border border-white/8 bg-[#0d1117]">
-              <textarea readOnly value={output} spellCheck={false} placeholder="Output appears here…" className={ta} style={{ lineHeight: "20px" }} />
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="flex h-9 shrink-0 items-center justify-between px-4" style={{ borderBottom: `1px solid ${et.shellBorder}` }}>
+              <span className="text-xs font-semibold" style={{ color: et.labelFg }}>{outputLabel}</span>
+              {!output && error && <span className="text-xs" style={{ color: et.gutterFg }}>Fix errors to see output</span>}
             </div>
-          </div>
-          <div className="shrink-0 border-t border-white/10 px-4 py-2">
-            <p className="text-xs text-gray-600">{output ? `${output.split("\n").length} lines · ${new Blob([output]).size.toLocaleString()} bytes · processed locally` : "Paste or type in the input panel"}</p>
+            <div className="min-h-0 flex-1 p-3">
+              <div className="relative h-full overflow-hidden rounded-lg" style={{ border: `1px solid ${et.shellBorder}`, backgroundColor: et.shell }}>
+                <textarea readOnly value={output} spellCheck={false} placeholder="Output appears here…" className={ta}
+                  style={{ lineHeight: "20px", color: et.editorFg, "--tw-ring-color": et.accent }} />
+              </div>
+            </div>
+            <div className="shrink-0 px-4 py-2" style={{ borderTop: `1px solid ${et.divider}`, backgroundColor: et.footerBg }}>
+              <p className="text-xs" style={{ color: et.footerFg }}>{output ? `${output.split("\n").length} lines · ${new Blob([output]).size.toLocaleString()} bytes · processed locally` : "Paste or type in the input panel"}</p>
+            </div>
           </div>
         </div>
       </div>

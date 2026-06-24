@@ -53,25 +53,16 @@ export default async function ToolPage({ params }) {
   };
 
   /* ── Full-bleed layout ── */
-  if (isFullBleed) {
-    return (
-      <main className="flex flex-col" style={{ height: "100dvh", overflow: "hidden" }}>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+    if (isFullBleed) {
+      return (
+        <main className="flex flex-col" style={{ height: "100dvh", overflow: "hidden" }}>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
-        <div className="flex min-h-0 flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <div className="hidden sm:flex shrink-0">
-            <ToolRail activeSlug={tool.slug} />
-          </div>
-          {/* Full-height widget */}
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <Widget />
-          </div>
-        </div>
-      </main>
-    );
-  }
+          <Widget />
+        </main>
+      );
+    }
 
   /* ── Normal padded layout ── */
   return (

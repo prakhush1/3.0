@@ -167,12 +167,14 @@ function StatusDot({ error, empty }) {
 function AnnotatedEditor({ value, onChange, errorLine, readOnly = false, placeholder, theme }) {
   const scrollRef = useRef(null);
   const taRef = useRef(null);
+  const isMultiline = (value || "").includes("\n");
+  const lineText = (value || "").split("\n").map((t) => `  ${t}`).join("\n").slice(2);
+  const displayValue = isMultiline ? value : lineText;
   const syncScroll = useCallback(() => {
-    if (scrollRef.current && taRef.current) {
-      scrollRef.current.scrollTop = taRef.current.scrollTop;
-      scrollRef.current.scrollLeft = taRef.current.scrollLeft;
-    }
-  }, []);
+      if (scrollRef.current && taRef.current) {
+        scrollRef.current.scrollTop = taRef.current.scrollTop;
+      }
+    }, []);
   useEffect(() => {
     if (!errorLine || !taRef.current) return;
     taRef.current.scrollTop = Math.max(0, (errorLine - 1) * 20 - 60);
@@ -194,10 +196,13 @@ function AnnotatedEditor({ value, onChange, errorLine, readOnly = false, placeho
           );
         })}
       </div>
-      <textarea ref={taRef} readOnly={readOnly} value={value} onChange={onChange}
+      <textarea ref={taRef} readOnly={readOnly} value={displayValue} onChange={(e) => {
+          const raw = e.target.value;
+          onChange(isMultiline ? raw : raw.replace(/^  /, ""));
+        }}
         onScroll={syncScroll} placeholder={placeholder} spellCheck={false}
         className="absolute inset-0 h-full w-full resize-none bg-transparent py-3 pr-4 outline-none"
-        style={{ paddingLeft: 44, lineHeight: "20px", color: theme.editorFg, caretColor: theme.accent, whiteSpace: "pre", overflowX: "auto", overflowY: "auto" }} />
+              style={{ paddingLeft: 44, lineHeight: "20px", color: theme.editorFg, caretColor: theme.accent, whiteSpace: "pre-wrap", overflowWrap: "break-word", overflowX: "hidden", overflowY: "auto" }} />
     </div>
   );
 }

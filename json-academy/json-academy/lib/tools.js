@@ -199,6 +199,29 @@ export const TOOLS = [
       { q: "What if I paste a full quoted string?", a: "Surrounding quotes are detected and stripped automatically before unescaping." },
     ],
   },
+  {
+    slug: "jwt-decoder",
+    icon: "lock",
+    tag: '"jwt":',
+    title: "JWT Decoder",
+    sub: "Inspect & verify tokens",
+    category: "Validate",
+    shortDesc:
+      "Decode any JSON Web Token and inspect its header, payload, and signature. Optionally verify HS256 / RS256 signatures locally.",
+    intro:
+      "Paste a JWT and instantly see its decoded header, payload, and signature — including standard claims like exp, iat, and iss with human-readable times. Verify HS256 signatures with a shared secret or RS256 signatures with a public key, all processed locally in your browser.",
+    keywords: ["jwt decoder", "json web token decoder", "jwt verifier", "jwt inspect", "decode jwt online"],
+    features: [
+      { title: "Three-panel inspector", desc: "Header, payload, and signature are shown side by side with colour-coded JSON." },
+      { title: "Standard claim guide", desc: "exp, iat, nbf, iss, sub, aud and jti are explained with relative times." },
+      { title: "Local signature verification", desc: "Verify HS256 with a shared secret or RS256 with a public key — nothing leaves your browser." },
+    ],
+    faqs: [
+      { q: "Is my JWT sent to a server?", a: "No. Decoding and verification happen entirely in your browser using the Web Crypto API." },
+      { q: "Which algorithms are supported?", a: "HS256 (HMAC-SHA-256 with a shared secret) and RS256 (RSA-PKCS1-v1_5 with a public key) verification are supported." },
+      { q: "What if my token is expired?", a: "The decoder still shows its contents but flags the exp claim in red and surfaces an 'Expired' badge in the top bar." },
+    ],
+  },
 ];
 
 export function getToolBySlug(slug) {

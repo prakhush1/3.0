@@ -631,19 +631,19 @@ export default function FormatterWidget() {
         style={{ backgroundColor: et.shell, borderBottom: `1px solid ${et.shellBorder}` }}>
         <div className="flex items-center gap-5">
           <Link href="/" className="flex items-center gap-1.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md text-white" style={{ backgroundColor: et.accent }}>
+            <span className="flex h-7 w-7 items-center justify-center rounded-md" style={{ backgroundColor: et.accent, color: et.accentFg }}>
               <Icon name="code" className="w-3.5 h-3.5" />
             </span>
-            <span className="hidden text-sm font-bold text-white sm:block">
+            <span className="hidden text-sm font-bold sm:block" style={{ color: et.editorFg }}>
               <span style={{ color: et.accent }}>&#123;JSON&#125;</span> Academy
             </span>
           </Link>
           <nav className="flex items-center gap-1">
             <Link href="/" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: et.labelFg }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = "#fff"; }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = et.editorFg; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = et.labelFg; }}>Home</Link>
             <Link href="/tools" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: et.labelFg }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = "#fff"; }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = et.editorFg; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = et.labelFg; }}>Tools</Link>
             <span className="ml-1 text-xs" style={{ color: et.gutterFg }}>/</span>
             <span className="ml-1 text-xs font-semibold" style={{ color: et.accent }}>JSON Formatter</span>

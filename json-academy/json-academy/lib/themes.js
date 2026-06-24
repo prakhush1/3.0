@@ -229,8 +229,8 @@ export const EDITOR_THEMES = [
     id: "slate-light",
     label: "Paper",
     swatch: "#f8fafc",
-    shell:        "#1e293b",
-    shellBorder:  "rgba(0,0,0,0.10)",
+    shell:        "#ffffff",
+    shellBorder:  "#e2e8f0",
     panelBg:      "#f8fafc",
     panelBorder:  "#e2e8f0",
     divider:      "#e2e8f0",
@@ -240,9 +240,9 @@ export const EDITOR_THEMES = [
     labelFg:      "#64748b",
     accent:       "#6366f1",
     accentFg:     "#ffffff",
-    btnBorder:    "rgba(255,255,255,0.15)",
-    btnFg:        "#cbd5e1",
-    btnHover:     "rgba(255,255,255,0.12)",
+    btnBorder:    "#e2e8f0",
+    btnFg:        "#475569",
+    btnHover:     "#f1f5f9",
     footerBg:     "#f1f5f9",
     footerFg:     "#94a3b8",
     wrapperBg:    "#f0f4f8",
@@ -271,5 +271,5 @@ export const EDITOR_THEMES = [
   },
 ];
 
-export const DEFAULT_EDITOR_THEME_ID = "arctic";
+export const DEFAULT_EDITOR_THEME_ID = "slate-light";
 export const EDITOR_THEME_STORAGE_KEY = "json-academy-editor-theme";

@@ -17,6 +17,14 @@ export const metadata = {
   description:
     "Format, validate, minify, convert, and compare JSON — all in one place. Fast, free, and privacy-first. Everything runs right in your browser.",
   alternates: { canonical: "/" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: "/icon-192.png",
+  },
   openGraph: {
     type: "website",
     siteName: "JSON Academy",

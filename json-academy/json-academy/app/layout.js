@@ -7,6 +7,7 @@ import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 export const metadata = {
   metadataBase: new URL("https://www.jsonacademy.com"),
@@ -46,6 +47,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="font-mono antialiased" style={{ backgroundColor: "var(--color-bg, #f9fafb)", color: "var(--color-ink, #171717)" }}>
+        <GoogleAnalytics />
         <ThemeProvider>
           {children}
           <SpeedInsights />

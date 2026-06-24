@@ -617,14 +617,14 @@ export default function FormatterWidget() {
   }, []);
 
   useEffect(() => {
-    
-    
+    document.documentElement.style.overflow = "hidden";
+    return () => { document.documentElement.style.overflow = ""; };
   }, []);
 
   const activeWin = windows.find(w => w.id === activeId) ?? windows[0];
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 overflow-hidden transition-colors" style={{ backgroundColor: et.wrapperBg }}>
+    <div className="fixed inset-0 flex flex-col overflow-hidden transition-colors" style={{ backgroundColor: et.wrapperBg }}>
 
       {/* ── Top bar ── */}
       <div className="flex h-12 shrink-0 items-center justify-between px-4"

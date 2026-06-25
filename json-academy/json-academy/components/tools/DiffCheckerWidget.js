@@ -33,12 +33,26 @@ function diff(a, b, path = "$") {
   return out;
 }
 
-const BADGE = {
-  added:   { borderColor: "rgba(16,185,129,0.4)", backgroundColor: "rgba(6,78,59,0.4)", color: "#34d399" },
-  removed: { borderColor: "rgba(239,68,68,0.4)",  backgroundColor: "rgba(127,29,29,0.4)", color: "#f87171" },
-  changed: { borderColor: "rgba(245,158,11,0.4)", backgroundColor: "rgba(120,53,15,0.4)", color: "#fbbf24" },
-};
-const DOT   = { added: "#34d399", removed: "#f87171", changed: "#fbbf24" };
+/* ─── theme-aware diff palette ───────────────────────── */
+/** Builds per-type colours that read well on both dark and light themes.
+ *  Light themes get solid soft fills with saturated text; dark themes get
+ *  translucent fills with bright text (same approach as before but with
+ *  theme-driven values so Paper and Arctic don't end up muddy). */
+function buildDiffPalette(theme) {
+  const isLight = theme.wrapperBg && parseInt(theme.wrapperBg.replace("#",""), 16) > 0x888888;
+  if (isLight) {
+    return {
+      added:   { bg: "#dcfce7", border: "#86efac", fg: "#166534", dot: "#16a34a" },
+      removed: { bg: "#fee2e2", border: "#fca5a5", fg: "#991b1b", dot: "#dc2626" },
+      changed: { bg: "#fef3c7", border: "#fcd34d", fg: "#92400e", dot: "#d97706" },
+    };
+  }
+  return {
+    added:   { bg: "rgba(16,185,129,0.18)", border: "rgba(16,185,129,0.45)", fg: "#34d399", dot: "#34d399" },
+    removed: { bg: "rgba(239,68,68,0.18)",  border: "rgba(239,68,68,0.45)",  fg: "#f87171", dot: "#f87171" },
+    changed: { bg: "rgba(245,158,11,0.18)", border: "rgba(245,158,11,0.45)", fg: "#fbbf24", dot: "#fbbf24" },
+  };
+}
 
 const ta = "absolute inset-0 h-full w-full resize-none bg-transparent py-3 px-4 outline-none placeholder:text-gray-600 focus:ring-1 focus:ring-inset font-mono text-[13px]";
 
@@ -83,6 +97,8 @@ export default function DiffCheckerWidget() {
     catch (e) { return { changes: [], error: e.message }; }
   }, [a, b]);
 
+  const palette = useMemo(() => buildDiffPalette(et), [et]);
+
   useEffect(() => { document.documentElement.style.overflow = "hidden"; return () => { document.documentElement.style.overflow = ""; }; }, []);
 
   return (
@@ -100,10 +116,10 @@ export default function DiffCheckerWidget() {
                 {["added","removed","changed"].map((t) => {
                   const n = changes.filter((c) => c.type === t).length;
                   if (!n) return null;
-                  const b = BADGE[t];
+                  const p = palette[t];
                   return <span key={t} className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold"
-                    style={{ borderColor: b.borderColor, backgroundColor: b.backgroundColor, color: b.color }}>
-                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: DOT[t] }} />{n} {t}
+                    style={{ borderColor: p.border, backgroundColor: p.bg, color: p.fg }}>
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: p.dot }} />{n} {t}
                   </span>;
                 })}
               </div>
@@ -135,14 +151,14 @@ export default function DiffCheckerWidget() {
           <div className="min-h-0 flex-1 overflow-auto p-3">
             {error && (
               <div className="flex items-start gap-2 rounded-lg border px-3 py-2.5"
-                style={{ borderColor: "rgba(239,68,68,0.4)", backgroundColor: "rgba(127,29,29,0.4)" }}>
-                <Icon name="zap" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-400" />
-                <p className="text-xs text-red-400">{error}</p>
+                style={{ borderColor: palette.removed.border, backgroundColor: palette.removed.bg }}>
+                <Icon name="zap" className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: palette.removed.fg }} />
+                <p className="text-xs" style={{ color: palette.removed.fg }}>{error}</p>
               </div>
             )}
             {!error && changes.length === 0 && a.trim() && b.trim() && (
               <div className="flex h-full items-center justify-center">
-                <div className="flex items-center gap-2 text-emerald-400">
+                <div className="flex items-center gap-2" style={{ color: palette.added.fg }}>
                   <Icon name="check-circle" className="h-4 w-4" />
                   <span className="text-sm font-semibold">No differences — both JSON documents are identical</span>
                 </div>
@@ -151,11 +167,11 @@ export default function DiffCheckerWidget() {
             {!error && changes.length > 0 && (
               <div className="space-y-1.5">
                 {changes.map((c, i) => {
-                  const bg = BADGE[c.type];
+                  const p = palette[c.type];
                   return (
                     <div key={i} className="flex items-start gap-3 rounded-lg border px-3 py-2 font-mono text-xs"
-                      style={{ borderColor: bg.borderColor, backgroundColor: bg.backgroundColor, color: bg.color }}>
-                      <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: DOT[c.type] }} />
+                      style={{ borderColor: p.border, backgroundColor: p.bg, color: p.fg }}>
+                      <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: p.dot }} />
                       <div className="min-w-0 flex-1">
                         <span className="font-semibold uppercase tracking-wide">{c.type}</span>
                         {" "}<span className="opacity-70">{c.path}</span>

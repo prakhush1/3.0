@@ -9,6 +9,7 @@ import EscapeWidget from "@/components/tools/EscapeWidget";
 import UnescapeWidget from "@/components/tools/UnescapeWidget";
 import JwtDecoderWidget from "@/components/tools/JwtDecoderWidget";
 import SqlFormatterWidget from "@/components/tools/SqlFormatterWidget";
+import StringCompareWidget from "@/components/tools/StringCompareWidget";
 
 FormatterWidget.fullBleed = true;
 ValidatorWidget.fullBleed = true;
@@ -21,6 +22,7 @@ EscapeWidget.fullBleed = true;
 UnescapeWidget.fullBleed = true;
 JwtDecoderWidget.fullBleed = true;
 SqlFormatterWidget.fullBleed = true;
+StringCompareWidget.fullBleed = true;
 
 export const WIDGETS = {
   "json-formatter": FormatterWidget,
@@ -34,4 +36,5 @@ export const WIDGETS = {
   "json-unescape": UnescapeWidget,
   "jwt-decoder": JwtDecoderWidget,
   "sql-formatter": SqlFormatterWidget,
+  "string-compare": StringCompareWidget,
 };

@@ -135,6 +135,21 @@ export default function Icon({ name, className = "w-5 h-5" }) {
           <path d="M15.5 18H9a3 3 0 0 1-3-3V8.5" />
         </svg>
       );
+    case "columns":
+      return (
+        <svg {...props}>
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <line x1="12" y1="3" x2="12" y2="21" />
+        </svg>
+      );
+    case "align-justify":
+      return (
+        <svg {...props}>
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      );
     case "search":
       return (
         <svg {...props}>

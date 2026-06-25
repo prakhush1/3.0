@@ -245,6 +245,29 @@ export const TOOLS = [
       { q: "Will it round-trip my data?", a: "Yes. Only whitespace, line breaks, and keyword case change — identifiers, literals, and comments are preserved exactly." },
     ],
   },
+  {
+    slug: "string-compare",
+    icon: "columns",
+    tag: '"string_diff":',
+    title: "String Compare",
+    sub: "Spot text differences",
+    category: "Compare",
+    shortDesc:
+      "Compare two blocks of text and instantly see which words were added, removed, or kept — perfect for spotting edits in copy, logs, or code.",
+    intro:
+      "Paste two versions of a text into the side-by-side editors and instantly see the differences highlighted word by word. Toggle between inline diff (additions underlined, removals struck through) and side-by-side diff (changed rows aligned) to inspect changes the way that suits you best. Everything runs locally in your browser.",
+    keywords: ["string compare", "text diff online", "compare two strings", "word diff", "text difference checker"],
+    features: [
+      { title: "Word-level diff", desc: "Compares word-by-word so you see exactly what changed and where." },
+      { title: "Inline or side-by-side", desc: "Switch between inline diff and aligned side-by-side rows to suit your workflow." },
+      { title: "Stats at a glance", desc: "Live character counts for added, removed, and unchanged text in the top bar." },
+    ],
+    faqs: [
+      { q: "Is the diff case-sensitive?", a: "Yes, words are compared exactly — including case and punctuation." },
+      { q: "Does it work on multi-line text?", a: "Yes, newlines are preserved and aligned line-by-line in side-by-side mode." },
+      { q: "Is my text uploaded anywhere?", a: "No. The diff runs entirely in your browser — nothing is sent to a server." },
+    ],
+  },
 ];
 
 export function getToolBySlug(slug) {

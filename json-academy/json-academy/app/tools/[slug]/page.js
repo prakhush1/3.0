@@ -14,10 +14,23 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   const tool = getToolBySlug(slug);
   if (!tool) return {};
+  const title = `${tool.title} — Free Online Tool`;
   return {
-    title: `${tool.title} — JSON Academy`,
-    description: tool.intro,
-    openGraph: { title: `${tool.title} — JSON Academy`, description: tool.intro },
+    title,
+    description: tool.shortDesc,
+    keywords: tool.keywords,
+    alternates: { canonical: `/tools/${tool.slug}` },
+    openGraph: {
+      title: `${title} | JSON Academy`,
+      description: tool.shortDesc,
+      url: `https://www.jsonacademy.com/tools/${tool.slug}`,
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: `${title} | JSON Academy`,
+      description: tool.shortDesc,
+    },
   };
 }
 
@@ -52,17 +65,36 @@ export default async function ToolPage({ params }) {
     })),
   };
 
-  /* ── Full-bleed layout ── */
-    if (isFullBleed) {
-      return (
-        <main className="flex flex-col" style={{ height: "100dvh", overflow: "hidden" }}>
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+  /* ── Full-bleed layout (interactive widget takes the viewport) ── */
+  if (isFullBleed) {
+    return (
+      <main className="flex flex-col" style={{ height: "100dvh", overflow: "hidden" }}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
-          <Widget />
-        </main>
-      );
-    }
+        {/* SSR-friendly indexable content — hidden visually, exposed to crawlers
+            and screen readers via .sr-only. Google indexes this for "json formatter",
+            "json escape" etc. without cluttering the UI. */}
+        <div className="sr-only">
+          <h1>{tool.title}</h1>
+          <p>{tool.intro}</p>
+          <ul>
+            {tool.features.map((f) => (
+              <li key={f.title}><strong>{f.title}</strong>: {f.desc}</li>
+            ))}
+          </ul>
+          {tool.faqs.map((f) => (
+            <section key={f.q}>
+              <h2>{f.q}</h2>
+              <p>{f.a}</p>
+            </section>
+          ))}
+        </div>
+
+        <Widget />
+      </main>
+    );
+  }
 
   /* ── Normal padded layout ── */
   return (
@@ -101,7 +133,7 @@ export default async function ToolPage({ params }) {
                 <div key={f.title}>
                   <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg"
                     style={{ backgroundColor: "var(--color-brand-100)", color: "var(--color-brand)" }}>
-                    <Icon name="check-circle" className="w-4 h-4" />
+                    <Icon name="check-circle" className="w-4 w-4" />
                   </div>
                   <h3 className="text-base font-bold">{f.title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-gray-500">{f.desc}</p>

@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Icon from "@/components/Icon";
 import { EDITOR_THEMES, DEFAULT_EDITOR_THEME_ID, EDITOR_THEME_STORAGE_KEY } from "@/lib/themes";
+import { buildJsonTree } from "@/lib/jsonTree.mjs";
 import FormatterToolPanel from "@/components/tools/FormatterToolPanel";
 
 /* ─── helpers ─────────────────────────────────────────── */
@@ -204,49 +205,152 @@ function AnnotatedEditor({ value, onChange, errorLine, readOnly = false, placeho
 
 /* ─── HighlightedOutput ───────────────────────────────── */
 
-function HighlightedOutput({ value, matches, activeMatchIdx, theme }) {
+function formatPrimitiveValue(value) {
+  if (typeof value === "string") return `"${value}"`;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (value === null) return "null";
+  return String(value);
+}
+
+function getPrimitiveColor(value, theme) {
+  if (typeof value === "string") return "#34d399";
+  if (typeof value === "number") return "#93c5fd";
+  if (typeof value === "boolean") return "#f9a8d4";
+  if (value === null) return "#cbd5e1";
+  return theme.editorFg;
+}
+
+function getAllPaths(node, path = "$") {
+  const paths = [path];
+  if (!node || (node.type !== "object" && node.type !== "array")) return paths;
+  for (const child of node.children ?? []) {
+    const childPath = node.type === "object" ? `${path}.${child.key}` : `${path}[${child.key}]`;
+    paths.push(...getAllPaths(child.node, childPath));
+  }
+  return paths;
+}
+
+function getDisplayLines(node, expandedPaths, path = "$", depth = 0, prefix = "") {
+  const lines = [];
+  if (!node) return lines;
+
+  const indent = "  ".repeat(depth);
+  const isObject = node.type === "object";
+  const isExpandable = node.type === "object" || node.type === "array";
+  const isExpanded = expandedPaths.has(path);
+  const children = node.children ?? [];
+
+  if (node.type === "primitive") {
+    const text = `${indent}${prefix ? `${prefix}: ` : ""}${formatPrimitiveValue(node.value)}`;
+    lines.push({ path, depth, text, isCollapsible: false, nodeType: "primitive" });
+    return lines;
+  }
+
+  const summary = children.length
+    ? `${children.length} ${children.length === 1 ? (isObject ? "property" : "item") : (isObject ? "properties" : "items")}`
+    : (isObject ? "empty object" : "empty array");
+  const opener = isExpanded
+    ? `${indent}${prefix ? `${prefix}: ` : ""}${isObject ? "{" : "["}`
+    : `${indent}${prefix ? `${prefix}: ` : ""}${isObject ? "{ " : "[ "}${summary} ${isObject ? "}" : "]"}`;
+
+  lines.push({ path, depth, text: opener, isCollapsible: isExpandable, nodeType: node.type });
+
+  if (isExpanded && children.length) {
+    for (const child of children) {
+      const childPath = isObject ? `${path}.${child.key}` : `${path}[${child.key}]`;
+      const childPrefix = isObject ? JSON.stringify(child.key) : `${child.key}`;
+      lines.push(...getDisplayLines(child.node, expandedPaths, childPath, depth + 1, childPrefix));
+    }
+    lines.push({ path: `${path}:close`, depth, text: `${indent}${isObject ? "}" : "]"}`, isCollapsible: false, nodeType: "close" });
+  }
+
+  return lines;
+}
+
+function buildHighlightedSegments(text, matches, activeMatchIdx, activeMarkRef, theme) {
+  const matchList = matches || [];
+  let segs = [];
+  let cursor = 0;
+
+  for (const match of matchList) {
+    if (match.startCol > cursor) segs.push({ type: "text", content: text.slice(cursor, match.startCol) });
+    segs.push({ type: "mark", content: text.slice(match.startCol, match.endCol), isActive: match.globalIdx === activeMatchIdx, globalIdx: match.globalIdx });
+    cursor = match.endCol;
+  }
+
+  if (cursor < text.length) segs.push({ type: "text", content: text.slice(cursor) });
+  if (segs.length === 0) segs.push({ type: "text", content: text });
+
+  return segs.map((seg, idx) => {
+    if (seg.type === "text") {
+      return <span key={`${seg.content}-${idx}`}>{seg.content}</span>;
+    }
+
+    return (
+      <mark
+        key={`${seg.content}-${idx}`}
+        ref={seg.isActive ? activeMarkRef : null}
+        style={{ backgroundColor: seg.isActive ? "#f59e0b" : "rgba(250, 204, 21, 0.35)", color: seg.isActive ? "#000" : "inherit", borderRadius: 2, outline: seg.isActive ? "2px solid #f59e0b" : "none" }}
+      >
+        {seg.content}
+      </mark>
+    );
+  });
+}
+
+function HighlightedOutput({ lines, matches, activeMatchIdx, theme, expandedPaths, onToggleNode }) {
   const containerRef = useRef(null);
   const activeMarkRef = useRef(null);
+
   useEffect(() => {
     if (activeMarkRef.current) activeMarkRef.current.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [activeMatchIdx, matches]);
-  const lines = useMemo(() => toLines(value || ""), [value]);
+
   const matchesByLine = useMemo(() => {
     const map = {};
-    matches.forEach((m, i) => { if (!map[m.line]) map[m.line] = []; map[m.line].push({ ...m, globalIdx: i }); });
+    (matches || []).forEach((match, idx) => {
+      if (!map[match.line]) map[match.line] = [];
+      map[match.line].push({ ...match, globalIdx: idx });
+    });
     return map;
   }, [matches]);
+
   return (
     <div ref={containerRef} className="h-full overflow-auto rounded-lg font-mono text-[13px]"
-      style={{ backgroundColor: theme.panelBg, border: `1px solid ${theme.panelBorder}`, lineHeight: "20px", paddingTop: 12, paddingBottom: 12 }}>
-      {lines.map(({ n, text }) => {
-        const lm = matchesByLine[n] || [];
-        let segs = [], cur = 0;
-        for (const m of lm) {
-          if (m.startCol > cur) segs.push({ type: "text", content: text.slice(cur, m.startCol) });
-          segs.push({ type: "mark", content: text.slice(m.startCol, m.endCol), isActive: m.globalIdx === activeMatchIdx, globalIdx: m.globalIdx });
-          cur = m.endCol;
-        }
-        if (cur < text.length) segs.push({ type: "text", content: text.slice(cur) });
-        if (segs.length === 0) segs.push({ type: "text", content: text });
-        return (
-          <div key={n} className="flex" style={{ lineHeight: "20px" }}>
-            <span className="select-none pr-3 text-right text-[11px] shrink-0"
-              style={{ minWidth: 36, paddingLeft: 8, color: theme.gutterFg }}>{n}</span>
-            <span className="pr-4 whitespace-pre" style={{ color: theme.editorFg }}>
-              {segs.map((seg, si) =>
-                seg.type === "text" ? <span key={si}>{seg.content}</span> : (
-                  <mark key={si} ref={seg.isActive ? activeMarkRef : null}
-                    style={{ backgroundColor: seg.isActive ? "#f59e0b" : "rgba(250,204,21,0.35)", color: seg.isActive ? "#000" : "inherit", borderRadius: 2, outline: seg.isActive ? "2px solid #f59e0b" : "none" }}>
-                    {seg.content}
-                  </mark>
-                )
-              )}
-            </span>
+      style={{ backgroundColor: theme.panelBg, border: `1px solid ${theme.panelBorder}`, lineHeight: "22px", paddingTop: 12, paddingBottom: 12 }}>
+      {lines.length > 0 ? (
+        <div className="space-y-0.5">
+          <div className="mb-3 text-[11px]" style={{ color: theme.gutterFg }}>
+            Expanded by default. Click a chevron to collapse or expand nested objects and arrays.
           </div>
-        );
-      })}
-      {!value && <p className="px-11 text-xs italic" style={{ color: theme.gutterFg }}>Output appears once JSON is valid…</p>}
+          {lines.map((line, idx) => {
+            const lineMatches = matchesByLine[idx + 1] || [];
+            return (
+              <div key={line.path} className="flex items-start gap-2 whitespace-pre-wrap">
+                {line.isCollapsible ? (
+                  <button
+                    type="button"
+                    onClick={() => onToggleNode(line.path)}
+                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-[14px] leading-none"
+                    style={{ color: theme.gutterFg }}
+                    aria-label={expandedPaths.has(line.path) ? "Collapse" : "Expand"}
+                    title={expandedPaths.has(line.path) ? "Collapse" : "Expand"}
+                  >
+                    {expandedPaths.has(line.path) ? "▾" : "▸"}
+                  </button>
+                ) : (
+                  <span className="mt-0.5 h-4 w-4 shrink-0" />
+                )}
+                <div className="min-w-0 flex-1 break-words" style={{ color: theme.editorFg }}>
+                  {buildHighlightedSegments(line.text, lineMatches, activeMatchIdx, activeMarkRef, theme)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="px-11 text-xs italic" style={{ color: theme.gutterFg }}>Output appears once JSON is valid…</p>
+      )}
     </div>
   );
 }
@@ -258,6 +362,7 @@ function FormatterPane({ win, onChange, et }) {
   const [copied, setCopied] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeMatchIdx, setActiveMatchIdx] = useState(0);
+  const [expandedPaths, setExpandedPaths] = useState(() => new Set(["$"]));
 
   const { parsed, error, errorLine, errorCol } = useMemo(() => parseJSON(input), [input]);
   const output = useMemo(() => {
@@ -265,13 +370,36 @@ function FormatterPane({ win, onChange, et }) {
     return JSON.stringify(parsed, null, indent === "tab" ? "\t" : indent);
   }, [parsed, indent]);
 
-  const matches = useMemo(() => findMatches(output, searchQuery), [output, searchQuery]);
-  useEffect(() => { setActiveMatchIdx(0); }, [matches.length, searchQuery]);
+  const tree = useMemo(() => (parsed ? buildJsonTree(parsed) : null), [parsed]);
+  useEffect(() => {
+    if (!parsed) {
+      setExpandedPaths(new Set(["$"]));
+      return;
+    }
+    setExpandedPaths(new Set(getAllPaths(tree)));
+  }, [parsed, tree]);
+
+  const visibleLines = useMemo(() => {
+    if (!tree) return [];
+    return getDisplayLines(tree, expandedPaths);
+  }, [tree, expandedPaths]);
+
+  const displayText = useMemo(() => visibleLines.map((line) => line.text).join("\n"), [visibleLines]);
+  const matches = useMemo(() => findMatches(displayText, searchQuery), [displayText, searchQuery]);
+  useEffect(() => { setActiveMatchIdx(0); }, [matches.length, searchQuery, expandedPaths]);
 
   const isEmpty = !input.trim();
   const clearSearch = useCallback(() => { setSearchQuery(""); setActiveMatchIdx(0); }, []);
   const goNext = useCallback(() => { if (matches.length) setActiveMatchIdx(i => (i + 1) % matches.length); }, [matches.length]);
   const goPrev = useCallback(() => { if (matches.length) setActiveMatchIdx(i => (i - 1 + matches.length) % matches.length); }, [matches.length]);
+  const toggleExpandedPath = useCallback((path) => {
+    setExpandedPaths(prev => {
+      const next = new Set(prev);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+  }, []);
 
   const handleCopy = useCallback(async () => {
     if (!output) return;
@@ -416,7 +544,14 @@ function FormatterPane({ win, onChange, et }) {
           </div>
         )}
         <div className="min-h-0 flex-1 p-3">
-          <HighlightedOutput value={output} matches={matches} activeMatchIdx={activeMatchIdx} theme={et} />
+          <HighlightedOutput
+            lines={visibleLines}
+            matches={matches}
+            activeMatchIdx={activeMatchIdx}
+            theme={et}
+            expandedPaths={expandedPaths}
+            onToggleNode={toggleExpandedPath}
+          />
         </div>
         <div className="shrink-0 px-4 py-2" style={{ borderTop: `1px solid ${et.divider}`, backgroundColor: et.footerBg }}>
           <p className="text-xs" style={{ color: et.footerFg }}>

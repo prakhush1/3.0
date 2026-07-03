@@ -191,5 +191,5 @@ export const EDITOR_THEMES = [
   },
 ];
 
-export const DEFAULT_EDITOR_THEME_ID = "dark";
+export const DEFAULT_EDITOR_THEME_ID = "light";
 export const EDITOR_THEME_STORAGE_KEY = "json-academy-editor-theme";

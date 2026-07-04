@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import Link from "next/link";
 import Icon from "@/components/Icon";
-import FormatterToolPanel from "@/components/tools/FormatterToolPanel";
+import ToolShell from "@/components/tools/ToolShell";
 import useEditorTheme from "@/components/tools/useEditorTheme";
 
 const SAMPLE_A = `{"name":"JSON Academy","tools":7,"price":0}`;
@@ -56,40 +55,11 @@ function buildDiffPalette(theme) {
 
 const ta = "absolute inset-0 h-full w-full resize-none bg-transparent py-3 px-4 outline-none placeholder:text-gray-600 focus:ring-1 focus:ring-inset font-mono text-[13px]";
 
-function TopBar({ title, right, theme }) {
-  return (
-    <div className="flex h-12 shrink-0 items-center justify-between px-4"
-      style={{ backgroundColor: theme.shell, borderBottom: `1px solid ${theme.shellBorder}` }}>
-      <div className="flex items-center gap-5">
-        <Link href="/" className="flex items-center gap-1.5">
-          <span className="flex h-7 w-7 items-center justify-center rounded-md" style={{ backgroundColor: theme.accent, color: theme.accentFg }}>
-            <Icon name="code" className="w-3.5 h-3.5" />
-          </span>
-          <span className="hidden text-sm font-bold sm:block" style={{ color: theme.editorFg }}>
-            <span style={{ color: theme.accent }}>&#123;JSON&#125;</span> Academy
-          </span>
-        </Link>
-        <nav className="flex items-center gap-1">
-          <Link href="/" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: theme.labelFg }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = theme.btnHover; e.currentTarget.style.color = theme.editorFg; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = theme.labelFg; }}>Home</Link>
-          <Link href="/tools" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: theme.labelFg }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = theme.btnHover; e.currentTarget.style.color = theme.editorFg; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = theme.labelFg; }}>Tools</Link>
-          <span className="ml-1 text-xs" style={{ color: theme.gutterFg }}>/</span>
-          <span className="ml-1 text-xs font-semibold" style={{ color: theme.accent }}>{title}</span>
-        </nav>
-      </div>
-      <div className="flex items-center gap-2">{right}</div>
-    </div>
-  );
-}
-
 /* ─── main ───────────────────────────────────────────── */
 export default function DiffCheckerWidget() {
   const [a, setA] = useState(SAMPLE_A);
   const [b, setB] = useState(SAMPLE_B);
-  const { theme: et } = useEditorTheme();
+  const { theme: et, setTheme } = useEditorTheme();
 
   const { changes, error } = useMemo(() => {
     if (!a.trim() || !b.trim()) return { changes: [], error: "" };

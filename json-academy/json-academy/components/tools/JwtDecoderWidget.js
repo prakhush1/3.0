@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import Link from "next/link";
 import Icon from "@/components/Icon";
-import FormatterToolPanel from "@/components/tools/FormatterToolPanel";
+import ToolShell from "@/components/tools/ToolShell";
 import useEditorTheme from "@/components/tools/useEditorTheme";
 
 const SAMPLE =
@@ -314,7 +313,7 @@ export default function JwtDecoderWidget() {
   const [verifyResult, setVerifyResult] = useState(null);
   const [verifying, setVerifying] = useState(false);
   const [copied, setCopied] = useState("");
-  const { theme: et } = useEditorTheme();
+  const { theme: et, setTheme } = useEditorTheme();
 
   const parsed = useMemo(() => {
     const trimmed = (token || "").trim();
@@ -368,25 +367,21 @@ export default function JwtDecoderWidget() {
   const sigBytes = parsed.parts ? (parsed.parts.signatureB64.length * 3 / 4 | 0) : 0;
 
   return (
-    <div className="fixed inset-0 flex overflow-hidden" style={{ backgroundColor: et.wrapperBg }}>
-      <FormatterToolPanel theme={et} activeSlug="jwt-decoder" />
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar theme={et} title="JWT Decoder" right={
-          <>
-            {parsed.alg && <AlgBadge alg={parsed.alg} theme={et} />}
-            {expStatus && (
-              <span className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider"
-                style={{ backgroundColor: expStatus === "expired" ? "rgba(248,113,113,0.18)" : `${et.accent}22`,
-                         color: expStatus === "expired" ? "#f87171" : et.accent }}>
-                <span className={`h-1.5 w-1.5 rounded-full ${expStatus === "expired" ? "bg-red-400" : ""}`}
-                  style={{ backgroundColor: expStatus === "expired" ? undefined : et.accent }} />
-                {expStatus === "expired" ? "Expired" : "Active"}
-              </span>
-            )}
-          </>
-        } />
-
+    <ToolShell title="JWT Decoder" activeSlug="jwt-decoder" theme={et} setTheme={setTheme} right={
+      <>
+        {parsed.alg && <AlgBadge alg={parsed.alg} theme={et} />}
+        {expStatus && (
+          <span className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider"
+            style={{ backgroundColor: expStatus === "expired" ? "rgba(248,113,113,0.18)" : `${et.accent}22`,
+                     color: expStatus === "expired" ? "#f87171" : et.accent }}>
+            <span className={`h-1.5 w-1.5 rounded-full ${expStatus === "expired" ? "bg-red-400" : ""}`}
+              style={{ backgroundColor: expStatus === "expired" ? undefined : et.accent }} />
+            {expStatus === "expired" ? "Expired" : "Active"}
+          </span>
+        )}
+      </>
+    }>
+      <div className="flex min-h-[760px] flex-col overflow-hidden rounded-[24px] border" style={{ borderColor: et.panelBorder, backgroundColor: et.panelBg }}>
         <div className="flex min-h-0 flex-1" style={{ borderTop: `1px solid ${et.shellBorder}` }}>
           {/* ── Left: token input ── */}
           <div className="flex min-h-0 flex-col" style={{ width: "42%", borderRight: `1px solid ${et.shellBorder}` }}>
@@ -527,7 +522,7 @@ export default function JwtDecoderWidget() {
           </div>
         </div>
       </div>
-    </div>
+    </ToolShell>
   );
 }
 

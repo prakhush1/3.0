@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
-import Link from "next/link";
 import Icon from "@/components/Icon";
-import FormatterToolPanel from "@/components/tools/FormatterToolPanel";
+import ToolShell from "@/components/tools/ToolShell";
 import useEditorTheme from "@/components/tools/useEditorTheme";
 
 const SAMPLE = `select id,name,email,created_at from users where active=true and country='US' order by created_at desc limit 50`;
@@ -364,7 +363,7 @@ export default function SqlFormatterWidget() {
   const [keywordCase, setKeywordCase] = useState("upper");
   const [outputMode, setOutputMode] = useState("formatted");
   const [copied, setCopied] = useState(false);
-  const { theme: et } = useEditorTheme();
+  const { theme: et, setTheme } = useEditorTheme();
 
   const formatted = useMemo(() => {
     if (!input.trim()) return "";
@@ -404,25 +403,21 @@ export default function SqlFormatterWidget() {
   useEffect(() => { document.documentElement.style.overflow = "hidden"; return () => { document.documentElement.style.overflow = ""; }; }, []);
 
   return (
-    <div className="fixed inset-0 flex overflow-hidden" style={{ backgroundColor: et.wrapperBg }}>
-      <FormatterToolPanel theme={et} activeSlug="sql-formatter" />
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar theme={et} title="SQL Formatter" right={
-          <>
-            <IndentPills indent={indent} setIndent={setIndent} theme={et} />
-            <KeywordToggle value={keywordCase} onChange={setKeywordCase} theme={et} />
-            <ToolbarBtn theme={et} onClick={handleCopy}>
-              <Icon name={copied ? "check-circle" : "copy"} className="w-3.5 h-3.5" />
-              {copied ? "Copied!" : "Copy"}
-            </ToolbarBtn>
-            <ToolbarBtn theme={et} onClick={handleDownload}>
-              <Icon name="download" className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Download</span>
-            </ToolbarBtn>
-          </>
-        } />
-
+    <ToolShell title="SQL Formatter" activeSlug="sql-formatter" theme={et} setTheme={setTheme} right={
+      <>
+        <IndentPills indent={indent} setIndent={setIndent} theme={et} />
+        <KeywordToggle value={keywordCase} onChange={setKeywordCase} theme={et} />
+        <ToolbarBtn theme={et} onClick={handleCopy}>
+          <Icon name={copied ? "check-circle" : "copy"} className="w-3.5 h-3.5" />
+          {copied ? "Copied!" : "Copy"}
+        </ToolbarBtn>
+        <ToolbarBtn theme={et} onClick={handleDownload}>
+          <Icon name="download" className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Download</span>
+        </ToolbarBtn>
+      </>
+    }>
+      <div className="flex min-h-[760px] flex-col overflow-hidden rounded-[24px] border" style={{ borderColor: et.panelBorder, backgroundColor: et.panelBg }}>
         <div className="flex min-h-0 flex-1" style={{ borderTop: `1px solid ${et.shellBorder}` }}>
           {/* Input */}
           <div className="flex min-h-0 flex-col" style={{ width: "50%", borderRight: `1px solid ${et.divider}` }}>
@@ -496,7 +491,7 @@ export default function SqlFormatterWidget() {
           </div>
         </div>
       </div>
-    </div>
+    </ToolShell>
   );
 }
 

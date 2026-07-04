@@ -181,7 +181,7 @@ function AnnotatedEditor({ value, onChange, errorLine, readOnly = false, placeho
   }, [errorLine, syncScroll]);
   const lines = toLines(value || "");
   return (
-    <div className="relative h-full min-h-0 overflow-hidden rounded-lg font-mono text-[13px]"
+    <div className="relative h-full min-h-[280px] overflow-hidden rounded-lg font-mono text-[13px]"
       style={{ backgroundColor: theme.panelBg, border: `1px solid ${theme.panelBorder}` }}>
       <div ref={scrollRef} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" style={{ paddingTop: 12, paddingBottom: 12 }}>
         {lines.map(({ n }) => {
@@ -329,7 +329,7 @@ function HighlightedOutput({ lines, matches, activeMatchIdx, theme, expandedPath
   }, [matches]);
 
   return (
-    <div ref={containerRef} className="h-full overflow-auto rounded-lg font-mono text-[13px]"
+    <div ref={containerRef} className="w-full overflow-visible rounded-lg font-mono text-[13px]"
       style={{ backgroundColor: theme.panelBg, border: `1px solid ${theme.panelBorder}`, lineHeight: "22px", paddingTop: 12, paddingBottom: 12 }}>
       {lines.length > 0 ? (
         <div className="space-y-0.5">
@@ -350,6 +350,9 @@ function HighlightedOutput({ lines, matches, activeMatchIdx, theme, expandedPath
             const blockPadding = isBlockHeader ? { paddingTop: 2, paddingBottom: 2 } : {};
             return (
               <div key={line.path} className="flex items-start gap-2 whitespace-pre-wrap" style={{ ...rowStyle, ...blockPadding }}>
+                <span className="mt-0.5 shrink-0 select-none text-right text-[11px] tabular-nums" style={{ minWidth: 34, paddingLeft: 8, color: theme.gutterFg }}>
+                  {idx + 1}
+                </span>
                 {line.isCollapsible ? (
                   <button
                     type="button"
@@ -438,13 +441,12 @@ function FormatterPane({ win, onChange, et }) {
   }, [output]);
 
   return (
-    <div className="flex min-h-0 flex-1 overflow-hidden">
-      {/* Input */}
-      <div className="flex min-h-0 flex-col overflow-hidden" style={{ width: "50%", borderRight: `1px solid ${et.divider}` }}>
-        <div className="flex h-9 shrink-0 items-center justify-between px-3"
+    <div className="grid w-full grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="flex min-h-[420px] flex-col overflow-visible rounded-[24px] border" style={{ backgroundColor: et.panelBg, borderColor: et.panelBorder }}>
+        <div className="flex h-11 shrink-0 items-center justify-between px-4"
           style={{ borderBottom: `1px solid ${et.divider}` }}>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold" style={{ color: et.labelFg }}>Input JSON</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: et.labelFg }}>Input JSON</span>
             <StatusDot error={error} empty={isEmpty} />
           </div>
           <div className="flex items-center gap-2">
@@ -459,7 +461,7 @@ function FormatterPane({ win, onChange, et }) {
             )}
           </div>
         </div>
-        <div className="min-h-0 flex-1 p-3">
+        <div className="flex-1 p-3">
           <AnnotatedEditor value={input} onChange={v => onChange({ input: v })} errorLine={errorLine} placeholder='Paste or type JSON here, e.g. {"name":"value"}' theme={et} />
         </div>
         {error && (
@@ -476,11 +478,10 @@ function FormatterPane({ win, onChange, et }) {
         )}
       </div>
 
-      {/* Output */}
-      <div className="flex min-h-0 flex-col overflow-hidden" style={{ width: "50%" }}>
-        <div className="flex h-9 shrink-0 items-center justify-between px-3"
+      <div className="flex min-h-0 flex-col overflow-hidden rounded-[24px] border" style={{ backgroundColor: et.panelBg, borderColor: et.panelBorder }}>
+        <div className="flex h-11 shrink-0 items-center justify-between px-4"
           style={{ borderBottom: `1px solid ${et.divider}` }}>
-          <span className="text-xs font-semibold" style={{ color: et.labelFg }}>Formatted output</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: et.labelFg }}>Formatted output</span>
           <div className="flex items-center gap-2">
             {output && (
               <>
@@ -500,17 +501,14 @@ function FormatterPane({ win, onChange, et }) {
             )}
           </div>
         </div>
-        {/* ── Inline search bar — always visible when output exists ── */}
         {output && (
           <div className="flex shrink-0 items-center gap-2 px-3 py-1.5"
             style={{ borderBottom: `1px solid ${et.divider}`, backgroundColor: et.panelBg }}>
-            {/* Search icon */}
             <svg className="w-3.5 h-3.5 shrink-0 transition-colors"
               style={{ color: searchQuery ? et.accent : et.gutterFg }}
               viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
             </svg>
-            {/* Input */}
             <input
               type="text"
               value={searchQuery}
@@ -524,7 +522,6 @@ function FormatterPane({ win, onChange, et }) {
               className="min-w-0 flex-1 bg-transparent text-xs outline-none"
               style={{ color: et.editorFg }}
             />
-            {/* Match counter */}
             {searchQuery && (
               <span className="shrink-0 text-[11px] tabular-nums font-medium px-1.5 py-0.5 rounded"
                 style={{
@@ -534,7 +531,6 @@ function FormatterPane({ win, onChange, et }) {
                 {matches.length === 0 ? "No results" : `${activeMatchIdx + 1} / ${matches.length}`}
               </span>
             )}
-            {/* Prev / Next — only shown when there are multiple matches */}
             {matches.length > 1 && (
               <>
                 <button onClick={goPrev} title="Previous match (Shift+Enter)"
@@ -557,7 +553,6 @@ function FormatterPane({ win, onChange, et }) {
                 </button>
               </>
             )}
-            {/* Clear × — only when there's a query */}
             {searchQuery && (
               <button onClick={clearSearch} title="Clear search (Esc)"
                 className="flex h-5 w-5 items-center justify-center rounded transition"
@@ -571,7 +566,7 @@ function FormatterPane({ win, onChange, et }) {
             )}
           </div>
         )}
-        <div className="min-h-0 flex-1 p-3">
+        <div className="flex-1 p-3">
           <HighlightedOutput
             lines={visibleLines}
             matches={matches}
@@ -757,18 +752,19 @@ export default function FormatterWidget() {
   });
 
   const addWindow = useCallback(() => {
-    setWindows(ws => {
-      const n = makeWindow(ws.length + 1);
-      setTimeout(() => setActiveId(n.id), 0);
-      return [...ws, n];
-    });
-  }, []);
+    const nextWindow = makeWindow(windows.length + 1);
+    setWindows(prev => [...prev, nextWindow]);
+    setActiveId(nextWindow.id);
+  }, [windows.length]);
 
   const closeWindow = useCallback(id => {
-    setWindows(ws => {
-      const idx = ws.findIndex(w => w.id === id);
-      const next = ws.filter(w => w.id !== id);
-      if (activeId === id && next.length > 0) setActiveId(next[Math.max(0, idx - 1)].id);
+    setWindows(prev => {
+      const idx = prev.findIndex(w => w.id === id);
+      const next = prev.filter(w => w.id !== id);
+      if (activeId === id) {
+        const fallback = next[Math.max(0, idx - 1)]?.id ?? next[0]?.id ?? null;
+        if (fallback !== null) setActiveId(fallback);
+      }
       return next;
     });
   }, [activeId]);
@@ -782,59 +778,72 @@ export default function FormatterWidget() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.style.overflow = "hidden";
-    return () => { document.documentElement.style.overflow = ""; };
+    const previousOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "";
+    return () => { document.documentElement.style.overflow = previousOverflow; };
   }, []);
+
+  useEffect(() => {
+    if (!windows.length) return;
+    if (!windows.some(w => w.id === activeId)) {
+      setActiveId(windows[windows.length - 1].id);
+    }
+  }, [windows, activeId]);
 
   const activeWin = windows.find(w => w.id === activeId) ?? windows[0];
 
   return (
-    <div className="fixed inset-0 flex overflow-hidden transition-colors" style={{ backgroundColor: et.wrapperBg }}>
-
-        {/* ── Left tool navigation panel (theme-aware, collapsible) ── */}
-        <FormatterToolPanel theme={et} activeSlug="json-formatter" />
-
-        {/* ── Main column ── */}
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-
-          {/* ── Top bar ── */}
-          <div className="flex h-12 shrink-0 items-center justify-between px-4"
-            style={{ backgroundColor: et.shell, borderBottom: `1px solid ${et.shellBorder}` }}>
-            <div className="flex items-center gap-5">
-              <Link href="/" className="flex items-center gap-1.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-md" style={{ backgroundColor: et.accent, color: et.accentFg }}>
-                  <Icon name="code" className="w-3.5 h-3.5" />
-                </span>
-                <span className="hidden text-sm font-bold sm:block" style={{ color: et.editorFg }}>
-                  <span style={{ color: et.accent }}>&#123;JSON&#125;</span> Academy
-                </span>
-              </Link>
-              <nav className="flex items-center gap-1">
-                <Link href="/" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: et.labelFg }}
-                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = et.editorFg; }}
-                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = et.labelFg; }}>Home</Link>
-                <Link href="/tools" className="rounded-md px-3 py-1.5 text-xs transition" style={{ color: et.labelFg }}
-                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = et.editorFg; }}
-                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = et.labelFg; }}>Tools</Link>
-                <span className="ml-1 text-xs" style={{ color: et.gutterFg }}>/</span>
-                <span className="ml-1 text-xs font-semibold" style={{ color: et.accent }}>JSON Formatter</span>
-              </nav>
-            </div>
-            <EditorThemePicker theme={et} setTheme={setEditorTheme} />
+    <div
+      className="relative min-h-screen w-full overflow-x-hidden overflow-y-auto p-3 transition-colors sm:p-4 lg:p-6"
+      style={{
+        backgroundColor: et.wrapperBg,
+        backgroundImage: et.extra?.bgMesh || "none",
+      }}
+    >
+      <div
+        className="mx-auto flex min-h-[760px] w-full max-w-[1600px] flex-col overflow-visible rounded-[32px] border shadow-2xl"
+        style={{
+          backgroundColor: et.shell,
+          borderColor: et.shellBorder,
+          boxShadow: et.extra?.glow || "0 20px 60px rgba(0, 0, 0, 0.18)",
+        }}
+      >
+        <div className="flex h-14 shrink-0 items-center justify-between px-4 sm:px-5"
+          style={{ borderBottom: `1px solid ${et.shellBorder}` }}>
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: et.accent, color: et.accentFg }}>
+                <Icon name="code" className="h-4 w-4" />
+              </span>
+              <span className="hidden text-sm font-bold sm:block" style={{ color: et.editorFg }}>
+                <span style={{ color: et.accent }}>JSON</span> Academy
+              </span>
+            </Link>
+            <nav className="flex items-center gap-1">
+              <Link href="/" className="rounded-lg px-3 py-1.5 text-xs transition" style={{ color: et.labelFg }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = et.editorFg; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = et.labelFg; }}>Home</Link>
+              <Link href="/tools" className="rounded-lg px-3 py-1.5 text-xs transition" style={{ color: et.labelFg }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = et.btnHover; e.currentTarget.style.color = et.editorFg; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = et.labelFg; }}>Tools</Link>
+              <span className="ml-1 text-xs" style={{ color: et.gutterFg }}>/</span>
+              <span className="ml-1 text-xs font-semibold" style={{ color: et.accent }}>JSON Formatter</span>
+            </nav>
           </div>
+          <EditorThemePicker theme={et} setTheme={setEditorTheme} />
+        </div>
 
-          {/* ── Window tab bar + [ + New Window ] button ── */}
-          <WindowTabBar
-            windows={windows}
-            activeId={activeId}
-            onSelect={setActiveId}
-            onClose={closeWindow}
-            onAdd={addWindow}
-            onRename={renameWindow}
-            et={et}
-          />
+        <WindowTabBar
+          windows={windows}
+          activeId={activeId}
+          onSelect={setActiveId}
+          onClose={closeWindow}
+          onAdd={addWindow}
+          onRename={renameWindow}
+          et={et}
+        />
 
-          {/* ── Active formatter pane ── */}
+        <div className="flex-1 p-3 sm:p-4 lg:p-5">
           {activeWin && (
             <FormatterPane
               key={activeWin.id}
@@ -844,8 +853,11 @@ export default function FormatterWidget() {
             />
           )}
         </div>
+
+        <FormatterToolPanel theme={et} activeSlug="json-formatter" />
       </div>
-    );
+    </div>
+  );
   }
 
 /* Mark this widget as full-bleed so the page layout skips its normal chrome */

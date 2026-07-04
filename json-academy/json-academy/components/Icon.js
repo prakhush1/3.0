@@ -186,6 +186,16 @@ export default function Icon({ name, className = "w-5 h-5" }) {
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
         </svg>
       );
+    case "palette":
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2a10 10 0 0 0-7.1 17.1" />
+          <path d="M12 22a10 10 0 0 0 7.1-17.1" />
+          <path d="M2 12h2" />
+          <path d="M20 12h2" />
+        </svg>
+      );
     case "download":
       return (
         <svg {...props}>

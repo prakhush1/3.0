@@ -230,7 +230,7 @@ function getAllPaths(node, path = "$") {
   return paths;
 }
 
-function getDisplayLines(node, expandedPaths, path = "$", depth = 0, prefix = "") {
+function getDisplayLines(node, expandedPaths, path = "$", depth = 0, prefix = "", scopePath = null) {
   const lines = [];
   if (!node) return lines;
 
@@ -239,10 +239,12 @@ function getDisplayLines(node, expandedPaths, path = "$", depth = 0, prefix = ""
   const isExpandable = node.type === "object" || node.type === "array";
   const isExpanded = expandedPaths.has(path);
   const children = node.children ?? [];
+  const blockType = node.type === "object" || node.type === "array" ? node.type : "primitive";
+  const activeScopePath = node.type === "object" || node.type === "array" ? path : scopePath;
 
   if (node.type === "primitive") {
     const text = `${indent}${prefix ? `${prefix}: ` : ""}${formatPrimitiveValue(node.value)}`;
-    lines.push({ path, depth, text, isCollapsible: false, nodeType: "primitive" });
+    lines.push({ path, depth, text, isCollapsible: false, nodeType: "primitive", scopePath: activeScopePath });
     return lines;
   }
 
@@ -253,15 +255,16 @@ function getDisplayLines(node, expandedPaths, path = "$", depth = 0, prefix = ""
     ? `${indent}${prefix ? `${prefix}: ` : ""}${isObject ? "{" : "["}`
     : `${indent}${prefix ? `${prefix}: ` : ""}${isObject ? "{ " : "[ "}${summary} ${isObject ? "}" : "]"}`;
 
-  lines.push({ path, depth, text: opener, isCollapsible: isExpandable, nodeType: node.type });
+  lines.push({ path, depth, text: opener, isCollapsible: isExpandable, nodeType: blockType, blockStart: true, scopePath: activeScopePath });
 
   if (isExpanded && children.length) {
     for (const child of children) {
       const childPath = isObject ? `${path}.${child.key}` : `${path}[${child.key}]`;
       const childPrefix = isObject ? JSON.stringify(child.key) : `${child.key}`;
-      lines.push(...getDisplayLines(child.node, expandedPaths, childPath, depth + 1, childPrefix));
+      const childScopePath = child.node.type === "object" || child.node.type === "array" ? childPath : activeScopePath;
+      lines.push(...getDisplayLines(child.node, expandedPaths, childPath, depth + 1, childPrefix, childScopePath));
     }
-    lines.push({ path: `${path}:close`, depth, text: `${indent}${isObject ? "}" : "]"}`, isCollapsible: false, nodeType: "close" });
+    lines.push({ path: `${path}:close`, depth, text: `${indent}${isObject ? "}" : "]"}`, isCollapsible: false, nodeType: "close", scopePath: activeScopePath });
   }
 
   return lines;
@@ -298,9 +301,19 @@ function buildHighlightedSegments(text, matches, activeMatchIdx, activeMarkRef, 
   });
 }
 
-function HighlightedOutput({ lines, matches, activeMatchIdx, theme, expandedPaths, onToggleNode }) {
+function HighlightedOutput({ lines, matches, activeMatchIdx, theme, expandedPaths, onToggleNode, colorizeScopes }) {
   const containerRef = useRef(null);
   const activeMarkRef = useRef(null);
+  const scopeColors = ["#fef3c7", "#dbeafe", "#dcfce7", "#fce7f3", "#ede9fe"];
+
+  const getScopeColor = useCallback((scopePath) => {
+    if (!colorizeScopes || !scopePath) return null;
+    let hash = 0;
+    for (let i = 0; i < scopePath.length; i += 1) {
+      hash = (hash * 31 + scopePath.charCodeAt(i)) % scopeColors.length;
+    }
+    return scopeColors[hash];
+  }, [colorizeScopes, scopeColors]);
 
   useEffect(() => {
     if (activeMarkRef.current) activeMarkRef.current.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -320,13 +333,23 @@ function HighlightedOutput({ lines, matches, activeMatchIdx, theme, expandedPath
       style={{ backgroundColor: theme.panelBg, border: `1px solid ${theme.panelBorder}`, lineHeight: "22px", paddingTop: 12, paddingBottom: 12 }}>
       {lines.length > 0 ? (
         <div className="space-y-0.5">
-          <div className="mb-3 text-[11px]" style={{ color: theme.gutterFg }}>
-            Expanded by default. Click a chevron to collapse or expand nested objects and arrays.
-          </div>
           {lines.map((line, idx) => {
             const lineMatches = matchesByLine[idx + 1] || [];
+            const scopeColor = getScopeColor(line.scopePath);
+            const rowStyle = scopeColor
+              ? {
+                  backgroundColor: `${scopeColor}55`,
+                  borderLeft: `3px solid ${scopeColor}`,
+                  borderRadius: 6,
+                  padding: "2px 8px",
+                  marginLeft: -8,
+                  marginRight: -8,
+                }
+              : {};
+            const isBlockHeader = line.blockStart && (line.nodeType === "object" || line.nodeType === "array");
+            const blockPadding = isBlockHeader ? { paddingTop: 2, paddingBottom: 2 } : {};
             return (
-              <div key={line.path} className="flex items-start gap-2 whitespace-pre-wrap">
+              <div key={line.path} className="flex items-start gap-2 whitespace-pre-wrap" style={{ ...rowStyle, ...blockPadding }}>
                 {line.isCollapsible ? (
                   <button
                     type="button"
@@ -363,6 +386,7 @@ function FormatterPane({ win, onChange, et }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeMatchIdx, setActiveMatchIdx] = useState(0);
   const [expandedPaths, setExpandedPaths] = useState(() => new Set(["$"]));
+  const [colorizeScopes, setColorizeScopes] = useState(false);
 
   const { parsed, error, errorLine, errorCol } = useMemo(() => parseJSON(input), [input]);
   const output = useMemo(() => {
@@ -460,6 +484,10 @@ function FormatterPane({ win, onChange, et }) {
           <div className="flex items-center gap-2">
             {output && (
               <>
+                <ToolbarBtn onClick={() => setColorizeScopes(v => !v)} theme={et} accent={colorizeScopes}>
+                  <Icon name="palette" className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Colors</span>
+                </ToolbarBtn>
                 <ToolbarBtn onClick={handleCopy} theme={et}>
                   <Icon name={copied ? "check-circle" : "copy"} className="w-3.5 h-3.5" />
                   {copied ? "Copied!" : "Copy"}
@@ -551,6 +579,7 @@ function FormatterPane({ win, onChange, et }) {
             theme={et}
             expandedPaths={expandedPaths}
             onToggleNode={toggleExpandedPath}
+            colorizeScopes={colorizeScopes}
           />
         </div>
         <div className="shrink-0 px-4 py-2" style={{ borderTop: `1px solid ${et.divider}`, backgroundColor: et.footerBg }}>

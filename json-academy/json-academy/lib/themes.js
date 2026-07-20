@@ -340,5 +340,5 @@ export const EDITOR_THEMES = [
   },
 ];
 
-export const DEFAULT_EDITOR_THEME_ID = "aurora";
+export const DEFAULT_EDITOR_THEME_ID = "lumen";
 export const EDITOR_THEME_STORAGE_KEY = "json-academy-editor-theme";

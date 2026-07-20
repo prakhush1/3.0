@@ -10,8 +10,60 @@ import FormatterToolPanel from "@/components/tools/FormatterToolPanel";
 /* ─── helpers ─────────────────────────────────────────── */
 
 let _uid = 0;
+let formatterWindowsState = null;
+let formatterActiveWindowId = null;
+
 function uid() { return ++_uid; }
+function syncUid(windows) {
+  const maxId = windows.reduce((max, window) => Math.max(max, Number(window.id) || 0), 0);
+  if (maxId > _uid) _uid = maxId;
+}
 function makeWindow(n) { return { id: uid(), label: `Window ${n}`, input: "", indent: 2 }; }
+function getFormatterState() {
+  if (!formatterWindowsState) {
+    formatterWindowsState = [makeWindow(1)];
+    formatterActiveWindowId = formatterWindowsState[0].id;
+  }
+  return { windows: formatterWindowsState, activeId: formatterActiveWindowId };
+}
+function saveFormatterState(windows, activeId) {
+  formatterWindowsState = windows;
+  formatterActiveWindowId = activeId;
+}
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
+function trackFormatterWindowPageView(windowIndex, windowLabel) {
+  if (typeof window === "undefined" || typeof window.gtag !== "function" || !GA_ID) return;
+
+  const pageIndex = windowIndex ?? 1;
+  const pagePath = `/tools/json-formatter/window/${pageIndex}`;
+  const pageTitle = `JSON Formatter · ${windowLabel || `Window ${pageIndex}`}`;
+  const pageLocation = `${window.location.origin}${pagePath}`;
+
+  window.gtag("config", GA_ID, { page_path: pagePath, page_title: pageTitle });
+  window.gtag("event", "page_view", {
+    page_title: pageTitle,
+    page_location: pageLocation,
+    page_path: pagePath,
+    event_category: "formatter-window",
+    event_label: windowLabel || `window-${pageIndex}`,
+  });
+  window.gtag("event", "formatter_window_opened", {
+    window_index: pageIndex,
+    window_label: windowLabel || `Window ${pageIndex}`,
+    page_path: pagePath,
+  });
+
+  if (window.history?.pushState) {
+    const params = new URLSearchParams(window.location.search);
+    params.set("window", String(pageIndex));
+    const nextUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.pushState({}, "", nextUrl);
+  }
+
+  document.title = pageTitle;
+}
 
 function parseJSON(raw) {
   if (!raw.trim()) return { parsed: null, error: "", errorLine: null, errorCol: null };
@@ -723,8 +775,20 @@ function WindowTabBar({ windows, activeId, onSelect, onClose, onAdd, onRename, e
 /* ─── Main Widget ─────────────────────────────────────── */
 
 export default function FormatterWidget() {
-  const [windows, setWindows] = useState(() => [makeWindow(1)]);
-  const [activeId, setActiveId] = useState(() => windows[0].id);
+  const [windows, setWindows] = useState(() => {
+    const { windows: storedWindows } = getFormatterState();
+    const initialWindows = storedWindows.map((window, index) => ({
+      ...window,
+      id: window.id ?? index + 1,
+      label: window.label || `Window ${index + 1}`,
+      input: window.input ?? "",
+      indent: window.indent ?? 2,
+    }));
+    syncUid(initialWindows);
+    formatterWindowsState = initialWindows;
+    return initialWindows;
+  });
+  const [activeId, setActiveId] = useState(() => getFormatterState().activeId);
 
   const [editorTheme, setEditorThemeState] = useState(
     () => EDITOR_THEMES.find(t => t.id === DEFAULT_EDITOR_THEME_ID) ?? EDITOR_THEMES[0]
@@ -753,8 +817,13 @@ export default function FormatterWidget() {
 
   const addWindow = useCallback(() => {
     const nextWindow = makeWindow(windows.length + 1);
-    setWindows(prev => [...prev, nextWindow]);
+    setWindows(prev => {
+      const next = [...prev, nextWindow];
+      saveFormatterState(next, nextWindow.id);
+      return next;
+    });
     setActiveId(nextWindow.id);
+    trackFormatterWindowPageView(windows.length + 1, nextWindow.label);
   }, [windows.length]);
 
   const closeWindow = useCallback(id => {
@@ -765,17 +834,26 @@ export default function FormatterWidget() {
         const fallback = next[Math.max(0, idx - 1)]?.id ?? next[0]?.id ?? null;
         if (fallback !== null) setActiveId(fallback);
       }
+      saveFormatterState(next, activeId === id ? (next[0]?.id ?? null) : activeId);
       return next;
     });
   }, [activeId]);
 
   const renameWindow = useCallback((id, label) => {
-    setWindows(ws => ws.map(w => w.id === id ? { ...w, label } : w));
-  }, []);
+    setWindows(ws => {
+      const next = ws.map(w => w.id === id ? { ...w, label } : w);
+      saveFormatterState(next, activeId);
+      return next;
+    });
+  }, [activeId]);
 
   const updateWindow = useCallback((id, patch) => {
-    setWindows(ws => ws.map(w => w.id === id ? { ...w, ...patch } : w));
-  }, []);
+    setWindows(ws => {
+      const next = ws.map(w => w.id === id ? { ...w, ...patch } : w);
+      saveFormatterState(next, activeId);
+      return next;
+    });
+  }, [activeId]);
 
   useEffect(() => {
     const previousOverflow = document.documentElement.style.overflow;
@@ -789,6 +867,12 @@ export default function FormatterWidget() {
       setActiveId(windows[windows.length - 1].id);
     }
   }, [windows, activeId]);
+
+  useEffect(() => {
+    if (!formatterWindowsState) {
+      saveFormatterState(windows, activeId);
+    }
+  }, [activeId, windows]);
 
   const activeWin = windows.find(w => w.id === activeId) ?? windows[0];
 

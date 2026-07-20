@@ -40,7 +40,8 @@ function diff(a, b, path = "$") {
  *  translucent fills with bright text (same approach as before but with
  *  theme-driven values so Paper and Arctic don't end up muddy). */
 function buildDiffPalette(theme) {
-  const isLight = theme.wrapperBg && parseInt(theme.wrapperBg.replace("#",""), 16) > 0x888888;
+  const wrapperBg = theme?.wrapperBg || "#ffffff";
+  const isLight = wrapperBg && parseInt(wrapperBg.replace("#",""), 16) > 0x888888;
   if (isLight) {
     return {
       added:   { bg: "#dcfce7", border: "#86efac", fg: "#166534", dot: "#16a34a" },
@@ -90,7 +91,25 @@ function TopBar({ title, right, theme }) {
 export default function DiffCheckerWidget() {
   const [a, setA] = useState(SAMPLE_A);
   const [b, setB] = useState(SAMPLE_B);
-  const { theme: et, setTheme } = useEditorTheme();
+  const { theme: et } = useEditorTheme();
+  const theme = et || {
+    shell: "#ffffff",
+    shellBorder: "#dfe7ee",
+    panelBg: "#f9fbfd",
+    panelBorder: "#dfe7ee",
+    divider: "#dfe7ee",
+    gutterFg: "#678099",
+    editorFg: "#14202c",
+    labelFg: "#678099",
+    accent: "#2563eb",
+    accentFg: "#ffffff",
+    btnBorder: "#dfe7ee",
+    btnFg: "#14202c",
+    btnHover: "rgba(37,99,235,0.08)",
+    footerBg: "#f6f8fb",
+    footerFg: "#678099",
+    wrapperBg: "#f6f8fb",
+  };
 
   const { changes, error } = useMemo(() => {
     if (!a.trim() || !b.trim()) return { changes: [], error: "" };
@@ -98,19 +117,19 @@ export default function DiffCheckerWidget() {
     catch (e) { return { changes: [], error: e.message }; }
   }, [a, b]);
 
-  const palette = useMemo(() => buildDiffPalette(et), [et]);
+  const palette = useMemo(() => buildDiffPalette(theme), [theme]);
 
   useEffect(() => { document.documentElement.style.overflow = "hidden"; return () => { document.documentElement.style.overflow = ""; }; }, []);
 
   return (
-    <div className="fixed inset-0 flex overflow-hidden" style={{ backgroundColor: et.wrapperBg }}>
-      <FormatterToolPanel theme={et} activeSlug="json-diff-checker" />
+    <div className="relative flex min-h-[100dvh] w-full overflow-hidden" style={{ backgroundColor: theme.wrapperBg }}>
+      <FormatterToolPanel theme={theme} activeSlug="json-diff-checker" />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar theme={et} title="JSON Diff Checker" right={
+        <TopBar theme={theme} title="JSON Diff Checker" right={
           !error && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold" style={{ color: et.labelFg }}>
+              <span className="text-xs font-semibold" style={{ color: theme.labelFg }}>
                 {changes.length === 0 ? "No differences" : `${changes.length} difference${changes.length > 1 ? "s" : ""}`}
               </span>
               <div className="flex gap-1.5">
@@ -128,17 +147,17 @@ export default function DiffCheckerWidget() {
           )
         } />
 
-        <div className="flex h-[45%] shrink-0" style={{ borderTop: `1px solid ${et.shellBorder}`, borderBottom: `1px solid ${et.shellBorder}` }}>
+        <div className="flex h-[45%] shrink-0" style={{ borderTop: `1px solid ${theme.shellBorder}`, borderBottom: `1px solid ${theme.shellBorder}` }}>
           {[{ label: "JSON A — original", val: a, set: setA }, { label: "JSON B — modified", val: b, set: setB }].map(({ label, val, set }, i) => (
-            <div key={label} className="flex min-w-0 flex-1 flex-col" style={{ borderRight: i === 0 ? `1px solid ${et.shellBorder}` : undefined }}>
-              <div className="flex h-9 shrink-0 items-center justify-between px-4" style={{ borderBottom: `1px solid ${et.shellBorder}` }}>
-                <span className="text-xs font-semibold" style={{ color: et.labelFg }}>{label}</span>
-                {val && <button type="button" onClick={() => set("")} className="text-xs transition" style={{ color: et.gutterFg }}>Clear</button>}
+            <div key={label} className="flex min-w-0 flex-1 flex-col" style={{ borderRight: i === 0 ? `1px solid ${theme.shellBorder}` : undefined }}>
+              <div className="flex h-9 shrink-0 items-center justify-between px-4" style={{ borderBottom: `1px solid ${theme.shellBorder}` }}>
+                <span className="text-xs font-semibold" style={{ color: theme.labelFg }}>{label}</span>
+                {val && <button type="button" onClick={() => set("")} className="text-xs transition" style={{ color: theme.gutterFg }}>Clear</button>}
               </div>
               <div className="min-h-0 flex-1 p-3">
-                <div className="relative h-full overflow-hidden rounded-lg" style={{ border: `1px solid ${et.shellBorder}`, backgroundColor: et.shell }}>
+                <div className="relative h-full overflow-hidden rounded-lg" style={{ border: `1px solid ${theme.shellBorder}`, backgroundColor: theme.shell }}>
                   <textarea value={val} onChange={(e) => set(e.target.value)} spellCheck={false} className={ta}
-                    style={{ lineHeight: "20px", color: et.editorFg, "--tw-ring-color": et.accent }} />
+                    style={{ lineHeight: "20px", color: theme.editorFg, "--tw-ring-color": theme.accent }} />
                 </div>
               </div>
             </div>
@@ -147,7 +166,7 @@ export default function DiffCheckerWidget() {
 
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex h-9 shrink-0 items-center px-4" style={{ borderBottom: `1px solid ${et.shellBorder}` }}>
-            <span className="text-xs font-semibold" style={{ color: et.labelFg }}>Diff results</span>
+            <span className="text-xs font-semibold" style={{ color: theme.labelFg }}>Diff results</span>
           </div>
           <div className="min-h-0 flex-1 overflow-auto p-3">
             {error && (
@@ -185,8 +204,8 @@ export default function DiffCheckerWidget() {
               </div>
             )}
           </div>
-          <div className="shrink-0 px-4 py-2" style={{ borderTop: `1px solid ${et.divider}`, backgroundColor: et.footerBg }}>
-            <p className="text-xs" style={{ color: et.footerFg }}>Comparison is key-order independent · processed locally</p>
+          <div className="shrink-0 px-4 py-2" style={{ borderTop: `1px solid ${theme.divider}`, backgroundColor: theme.footerBg }}>
+            <p className="text-xs" style={{ color: theme.footerFg }}>Comparison is key-order independent · processed locally</p>
           </div>
         </div>
       </div>

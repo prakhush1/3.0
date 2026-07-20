@@ -85,7 +85,8 @@ function diffWords(a, b) {
 
 /* ─── theme-aware diff palette ───────────────────────── */
 function buildDiffPalette(theme) {
-  const isLight = theme.wrapperBg && parseInt(theme.wrapperBg.replace("#",""), 16) > 0x888888;
+  const wrapperBg = theme?.wrapperBg || "#ffffff";
+  const isLight = wrapperBg && parseInt(wrapperBg.replace("#",""), 16) > 0x888888;
   if (isLight) {
     return {
       added:   { fg: "#166534", bg: "#dcfce7", decoration: "#86efac" },
@@ -119,10 +120,28 @@ export default function StringCompareWidget() {
   const [a, setA] = useState(SAMPLE_A);
   const [b, setB] = useState(SAMPLE_B);
   const [view, setView] = useState("inline"); // "inline" | "side"
-  const { theme: et, setTheme } = useEditorTheme();
+  const { theme: et } = useEditorTheme();
+  const theme = et || {
+    shell: "#ffffff",
+    shellBorder: "#dfe7ee",
+    panelBg: "#f9fbfd",
+    panelBorder: "#dfe7ee",
+    divider: "#dfe7ee",
+    gutterFg: "#678099",
+    editorFg: "#14202c",
+    labelFg: "#678099",
+    accent: "#2563eb",
+    accentFg: "#ffffff",
+    btnBorder: "#dfe7ee",
+    btnFg: "#14202c",
+    btnHover: "rgba(37,99,235,0.08)",
+    footerBg: "#f6f8fb",
+    footerFg: "#678099",
+    wrapperBg: "#f6f8fb",
+  };
 
   const segments = useMemo(() => diffWords(a, b), [a, b]);
-  const palette = useMemo(() => buildDiffPalette(et), [et]);
+  const palette = useMemo(() => buildDiffPalette(theme), [theme]);
 
   const counts = useMemo(() => {
     let added = 0, removed = 0, equal = 0;
@@ -144,13 +163,13 @@ export default function StringCompareWidget() {
   const isIdentical = counts.added === 0 && counts.removed === 0;
 
   return (
-    <div className="fixed inset-0 flex overflow-hidden" style={{ backgroundColor: et.wrapperBg }}>
-      <FormatterToolPanel theme={et} activeSlug="string-compare" />
+    <div className="relative flex min-h-[100dvh] w-full overflow-hidden" style={{ backgroundColor: theme.wrapperBg }}>
+      <FormatterToolPanel theme={theme} activeSlug="string-compare" />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar theme={et} title="String Compare" right={
+        <TopBar theme={theme} title="String Compare" right={
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 rounded-md p-0.5" style={{ border: `1px solid ${et.btnBorder}` }}>
+            <div className="flex items-center gap-1 rounded-md p-0.5" style={{ border: `1px solid ${theme.btnBorder}` }}>
               {[
                 { v: "inline", label: "Inline" },
                 { v: "side", label: "Side by side" },
@@ -160,17 +179,17 @@ export default function StringCompareWidget() {
                   <button key={v} type="button" onClick={() => setView(v)}
                     className="rounded px-2.5 py-1 text-[11px] font-semibold transition"
                     style={{
-                      backgroundColor: isActive ? et.accent : "transparent",
-                      color: isActive ? et.accentFg : et.btnFg,
+                      backgroundColor: isActive ? theme.accent : "transparent",
+                      color: isActive ? theme.accentFg : theme.btnFg,
                     }}>{label}</button>
                 );
               })}
             </div>
-            <ToolbarBtn theme={et} onClick={handleSwap}>
+            <ToolbarBtn theme={theme} onClick={handleSwap}>
               <Icon name="repeat" className="w-3.5 h-3.5" />Swap
             </ToolbarBtn>
             {!isIdentical && (
-              <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: et.labelFg }}>
+              <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: theme.labelFg }}>
                 <span className="flex items-center gap-1" style={{ color: palette.added.fg }}>
                   <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: palette.added.fg }} />+{counts.added}
                 </span>
@@ -187,22 +206,22 @@ export default function StringCompareWidget() {
           </div>
         } />
 
-        <div className="flex h-[42%] shrink-0" style={{ borderTop: `1px solid ${et.shellBorder}`, borderBottom: `1px solid ${et.shellBorder}` }}>
+        <div className="flex h-[42%] shrink-0" style={{ borderTop: `1px solid ${theme.shellBorder}`, borderBottom: `1px solid ${theme.shellBorder}` }}>
           {[{ label: "Text A", val: a, set: setA }, { label: "Text B", val: b, set: setB }].map(({ label, val, set }, i) => (
-            <div key={label} className="flex min-w-0 flex-1 flex-col" style={{ borderRight: i === 0 ? `1px solid ${et.shellBorder}` : undefined }}>
-              <div className="flex h-9 shrink-0 items-center justify-between px-4" style={{ borderBottom: `1px solid ${et.shellBorder}` }}>
-                <span className="text-xs font-semibold" style={{ color: et.labelFg }}>{label}</span>
+            <div key={label} className="flex min-w-0 flex-1 flex-col" style={{ borderRight: i === 0 ? `1px solid ${theme.shellBorder}` : undefined }}>
+              <div className="flex h-9 shrink-0 items-center justify-between px-4" style={{ borderBottom: `1px solid ${theme.shellBorder}` }}>
+                <span className="text-xs font-semibold" style={{ color: theme.labelFg }}>{label}</span>
                 <div className="flex items-center gap-3">
-                  <span className="text-[11px] font-mono" style={{ color: et.gutterFg }}>{val.length.toLocaleString()} chars · {val.split("\n").length} line{val.split("\n").length > 1 ? "s" : ""}</span>
-                  {val && <button type="button" onClick={() => set("")} className="text-xs transition" style={{ color: et.gutterFg }}
-                    onMouseEnter={e => { e.currentTarget.style.color = et.labelFg; }}
-                    onMouseLeave={e => { e.currentTarget.style.color = et.gutterFg; }}>Clear</button>}
+                  <span className="text-[11px] font-mono" style={{ color: theme.gutterFg }}>{val.length.toLocaleString()} chars · {val.split("\n").length} line{val.split("\n").length > 1 ? "s" : ""}</span>
+                  {val && <button type="button" onClick={() => set("")} className="text-xs transition" style={{ color: theme.gutterFg }}
+                    onMouseEnter={e => { e.currentTarget.style.color = theme.labelFg; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = theme.gutterFg; }}>Clear</button>}
                 </div>
               </div>
               <div className="min-h-0 flex-1 p-3">
-                <div className="relative h-full overflow-hidden rounded-lg" style={{ border: `1px solid ${et.shellBorder}`, backgroundColor: et.shell }}>
+                <div className="relative h-full overflow-hidden rounded-lg" style={{ border: `1px solid ${theme.shellBorder}`, backgroundColor: theme.shell }}>
                   <textarea value={val} onChange={(e) => set(e.target.value)} spellCheck={false} placeholder={`Paste ${label.toLowerCase()} here…`} className={ta}
-                    style={{ lineHeight: "20px", color: et.editorFg, "--tw-ring-color": et.accent }} />
+                    style={{ lineHeight: "20px", color: theme.editorFg, "--tw-ring-color": theme.accent }} />
                 </div>
               </div>
             </div>
@@ -210,15 +229,15 @@ export default function StringCompareWidget() {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex h-9 shrink-0 items-center px-4" style={{ borderBottom: `1px solid ${et.shellBorder}` }}>
-            <span className="text-xs font-semibold" style={{ color: et.labelFg }}>
+          <div className="flex h-9 shrink-0 items-center px-4" style={{ borderBottom: `1px solid ${theme.shellBorder}` }}>
+            <span className="text-xs font-semibold" style={{ color: theme.labelFg }}>
               {view === "inline" ? "Inline diff" : "Side-by-side diff"}
             </span>
           </div>
           <div className="min-h-0 flex-1 overflow-auto p-4">
             {!a.trim() || !b.trim() ? (
               <div className="flex h-full items-center justify-center">
-                <p className="text-sm italic" style={{ color: et.gutterFg }}>Paste text in both panels above to compare</p>
+                <p className="text-sm italic" style={{ color: theme.gutterFg }}>Paste text in both panels above to compare</p>
               </div>
             ) : isIdentical ? (
               <div className="flex h-full items-center justify-center">
@@ -228,13 +247,13 @@ export default function StringCompareWidget() {
                 </div>
               </div>
             ) : view === "inline" ? (
-              <InlineDiff segments={segments} palette={palette} et={et} />
+              <InlineDiff segments={segments} palette={palette} et={theme} />
             ) : (
-              <SideBySideDiff segments={segments} palette={palette} et={et} />
+              <SideBySideDiff segments={segments} palette={palette} et={theme} />
             )}
           </div>
-          <div className="shrink-0 px-4 py-2" style={{ borderTop: `1px solid ${et.divider}`, backgroundColor: et.footerBg }}>
-            <p className="text-xs" style={{ color: et.footerFg }}>
+          <div className="shrink-0 px-4 py-2" style={{ borderTop: `1px solid ${theme.divider}`, backgroundColor: theme.footerBg }}>
+            <p className="text-xs" style={{ color: theme.footerFg }}>
               Word-level LCS diff · processed locally
             </p>
           </div>

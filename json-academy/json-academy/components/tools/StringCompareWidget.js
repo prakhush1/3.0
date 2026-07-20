@@ -163,10 +163,8 @@ export default function StringCompareWidget() {
   const isIdentical = counts.added === 0 && counts.removed === 0;
 
   return (
-    <div className="relative flex min-h-[100dvh] w-full overflow-hidden" style={{ backgroundColor: theme.wrapperBg }}>
-      <FormatterToolPanel theme={theme} activeSlug="string-compare" />
-
-      <div className="flex min-w-0 flex-1 flex-col">
+    <div className="relative flex min-h-[100dvh] w-full flex-col overflow-hidden" style={{ backgroundColor: theme.wrapperBg }}>
+      <div className="flex min-h-0 flex-1 flex-col">
         <TopBar theme={theme} title="String Compare" right={
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 rounded-md p-0.5" style={{ border: `1px solid ${theme.btnBorder}` }}>
@@ -259,6 +257,7 @@ export default function StringCompareWidget() {
           </div>
         </div>
       </div>
+      <FormatterToolPanel theme={theme} activeSlug="string-compare" />
     </div>
   );
 }

@@ -122,10 +122,8 @@ export default function DiffCheckerWidget() {
   useEffect(() => { document.documentElement.style.overflow = "hidden"; return () => { document.documentElement.style.overflow = ""; }; }, []);
 
   return (
-    <div className="relative flex min-h-[100dvh] w-full overflow-hidden" style={{ backgroundColor: theme.wrapperBg }}>
-      <FormatterToolPanel theme={theme} activeSlug="json-diff-checker" />
-
-      <div className="flex min-w-0 flex-1 flex-col">
+    <div className="relative flex min-h-[100dvh] w-full flex-col overflow-hidden" style={{ backgroundColor: theme.wrapperBg }}>
+      <div className="flex min-h-0 flex-1 flex-col">
         <TopBar theme={theme} title="JSON Diff Checker" right={
           !error && (
             <div className="flex items-center gap-2">
@@ -209,6 +207,7 @@ export default function DiffCheckerWidget() {
           </div>
         </div>
       </div>
+      <FormatterToolPanel theme={theme} activeSlug="json-diff-checker" />
     </div>
   );
 }

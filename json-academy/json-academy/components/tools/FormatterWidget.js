@@ -503,6 +503,14 @@ function FormatterPane({ win, onChange, et }) {
           </div>
           <div className="flex items-center gap-2">
             <IndentPills indent={indent} setIndent={v => onChange({ indent: v })} theme={et} />
+            {isEmpty && (
+              <button type="button" onClick={() => onChange({ input: SAMPLE_JSON })}
+                className="text-xs transition" style={{ color: et.accent }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = 0.9; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = 1; }}>
+                Load sample
+              </button>
+            )}
             {input && (
               <button type="button" onClick={() => onChange({ input: "" })}
                 className="text-xs transition" style={{ color: et.gutterFg }}
